@@ -1,3 +1,5 @@
 venv/
 .idea/
 __pycache__/
+sample/
+.DS_Store
