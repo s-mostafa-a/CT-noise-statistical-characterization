@@ -14,7 +14,7 @@ MU = {1: 340 - delta, 2: 240 - delta, 3: 100 - delta, 4: 0 - delta, 5: -160 - de
       8: -810 - delta, 9: -987 - delta}
 J = len(MU)
 MAX_ITER = 20
-ERR = np.Infinity
+Err = np.Infinity
 # Tolerance
 TOL = 0.1
 '''</constants>'''
@@ -34,7 +34,7 @@ for i in range(N):
 lamda = np.array(lamda)
 assert lamda.shape == (N, J)
 n = 0
-while ERR > TOL and n < MAX_ITER:
+while Err > TOL and n < MAX_ITER:
     n += 1
     alphas = []
     betas = []
@@ -55,7 +55,7 @@ while ERR > TOL and n < MAX_ITER:
     lamda = form_for_bayes / np.sum(form_for_bayes, axis=1).reshape(-1, 1)
     t_p = np.array([np.array(theta['alpha']), np.array(theta['beta']), np.array(theta['phi'])])
     t_n = np.array([np.array(alphas), np.array(betas), np.array(phis)])
-    ERR = np.linalg.norm(t_n - t_p) / np.linalg.norm(t_p)
+    Err = np.linalg.norm(t_n - t_p) / np.linalg.norm(t_p)
     theta = {'phi': phis, 'alpha': alphas, 'beta': betas}
     print('n:', n)
-    print('Err:', ERR)
+    print('Err:', Err)

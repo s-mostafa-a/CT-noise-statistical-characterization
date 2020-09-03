@@ -22,10 +22,10 @@ def form_of_equation_18(y, phi, alpha, beta):
     return phi * central_gamma_pdf(y, alpha=alpha, beta=beta)
 
 
-def broadcast_tile(matrix, h, w):
-    m, n = matrix.shape[0] * h, matrix.shape[1] * w
-    return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1),
-                           (matrix.shape[0], h, matrix.shape[1], w)).reshape(m, n)
+def broadcast_tile(matrix, h, w, d):
+    m, n, o = matrix.shape[0] * h, matrix.shape[1] * w, matrix.shape[2] * d
+    return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1, matrix.shape[2], 1),
+                           (matrix.shape[0], h, matrix.shape[1], w, matrix.shape[2], d)).reshape(m, n, o)
 
 
 def equation_18_on_vector_of_j_elements(y_arr, mini_theta_arr):
@@ -66,14 +66,50 @@ class CTScan(object):
         self._image[self._image < MIN_BOUND] = MIN_BOUND
 
 
-class Neighborhood:
-    def __init__(self, Y, gamma, neighborhood_size):
+class ComputeBasedOnNeighborhood:
+    def __init__(self, Y, gamma, mu, neighborhood_size):
+        assert len(Y.shape) == 2
+        assert Y.shape[0] % neighborhood_size == 0
+        assert Y.shape[1] % neighborhood_size == 0
         self._Y = Y
         self._gamma = gamma
         self._neighborhood_size = neighborhood_size
+        self._J = gamma.shape[2]
+        self.mini_alpha = np.ones((Y.shape[0] // neighborhood_size, Y.shape[0] // neighborhood_size, self._J))
+        self.mini_beta = np.ones((Y.shape[0] // neighborhood_size, Y.shape[0] // neighborhood_size, self._J))
+        self.mini_phi = np.ones((Y.shape[0] // neighborhood_size, Y.shape[0] // neighborhood_size, self._J))
+        self._mu = mu
+        self._new_theta = None
 
     def compute_for_neighbors(self):
-        pass
+        first_form_summation = np.zeros(self.mini_alpha.shape)
+        second_form_summation = np.zeros(self.mini_alpha.shape)
+        denominator_summation = np.zeros(self.mini_alpha.shape)
+        for component in range(self._J):
+            for i in range(self._Y.shape[0]):
+                for j in range(self._Y.shape[1]):
+                    first_form_summation[i // self._neighborhood_size, j // self._neighborhood_size, component] += \
+                        self._gamma[i, j, component] * self._Y[i, j] / self._mu[component]
+                    second_form_summation[i // self._neighborhood_size, j // self._neighborhood_size, component] += \
+                        self._gamma[i, j, component] * math.log(self._Y[i, j] / self._mu[component])
+                    denominator_summation[i // self._neighborhood_size, j // self._neighborhood_size, component] += \
+                        self._gamma[i, j, component]
+        self.mini_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
+        self.mini_beta = np.array(self._mu) / self.mini_alpha
+        self.mini_phi = denominator_summation
 
-    def get_matrix(self):
-        pass
+    def get_theta(self):
+        phi = broadcast_tile(self.mini_phi, self._neighborhood_size, self._neighborhood_size, 1)
+        alpha = broadcast_tile(self.mini_alpha, self._neighborhood_size, self._neighborhood_size, 1)
+        beta = broadcast_tile(self.mini_beta, self._neighborhood_size, self._neighborhood_size, 1)
+        theta = np.array([phi, alpha, beta])
+        self._new_theta = np.moveaxis(theta, [0, 1, 2, 3], [2, 0, 1, 3])
+        return self._new_theta
+
+    def get_gamma(self):
+        gamma = np.zeros(shape=self._gamma.shape)
+        for i, a in enumerate(self._Y):
+            for j, b in enumerate(a):
+                to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, self._new_theta[i, j]).reshape(1, -1)
+                gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
+        return gamma

@@ -2,17 +2,17 @@ import time
 
 import numpy as np
 
-from utils import equation_18_on_vector_of_j_elements
+from utils import equation_18_on_vector_of_j_elements, ComputeBasedOnNeighborhood
 
 '''<constants>'''
 # min HU
 delta = -1024
 # Mu for 9 components
-MU = {0: 340 - delta, 1: 240 - delta, 2: 100 - delta, 3: 0 - delta, 4: -160 - delta, 5: -370 - delta, 6: -540 - delta,
-      7: -810 - delta, 8: -987 - delta}
+MU = [340 - delta, 240 - delta, 100 - delta, 0 - delta, -160 - delta, -370 - delta, -540 - delta, -810 - delta,
+      -987 - delta]
 J = len(MU)
 MAX_ITER = 20
-ERR = np.Infinity
+Err = np.Infinity
 # Tolerance
 TOL = 0.1
 '''</constants>'''
@@ -37,10 +37,17 @@ for i, a in enumerate(Y):
     for j, b in enumerate(a):
         to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, theta[i, j]).reshape(1, -1)
         gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
-print(f'It took {(time.time_ns() - t1) / 1000000000} seconds.')
+print(f'First initialization took {(time.time_ns() - t1) / 1000000000} seconds.')
 
 n = 0
-while ERR > TOL and n < MAX_ITER:
+while Err > TOL and n < MAX_ITER:
+    t1 = time.time_ns()
     n += 1
-    for j in range(J):
-        pass
+    nbh = ComputeBasedOnNeighborhood(Y, gamma, MU, neighborhood_size)
+    nbh.compute_for_neighbors()
+    new_theta = nbh.get_theta()
+    new_gamma = nbh.get_gamma()
+    ERR = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
+    theta = new_theta
+    gamma = new_gamma
+    print(f'The iteration took {(time.time_ns() - t1) / 1000000000} seconds.')
