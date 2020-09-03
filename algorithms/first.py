@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from utils import central_gamma_pdf
+from resources.utils import central_gamma_pdf
 
 '''<constants>'''
 # length of pixels vector

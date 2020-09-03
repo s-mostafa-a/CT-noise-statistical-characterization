@@ -2,7 +2,7 @@ import time
 
 import numpy as np
 
-from utils import equation_18_on_vector_of_j_elements, ComputeBasedOnNeighborhood
+from resources.utils import equation_18_on_vector_of_j_elements, ComputeBasedOnNeighborhood
 
 '''<constants>'''
 # min HU
@@ -14,10 +14,10 @@ J = len(MU)
 MAX_ITER = 20
 Err = np.Infinity
 # Tolerance
-TOL = 0.1
+TOL = 1
 '''</constants>'''
 
-img = np.load(f'''./sample/img.npy''')
+img = np.load(f'''../sample/img.npy''')
 # We know that img.shape is (280, 364,364)
 # so we set the neighborhood size to 28
 neighborhood_size = 28
@@ -47,7 +47,9 @@ while Err > TOL and n < MAX_ITER:
     nbh.compute_for_neighbors()
     new_theta = nbh.get_theta()
     new_gamma = nbh.get_gamma()
-    ERR = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
+    print(np.linalg.norm(theta))
+    Err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
     theta = new_theta
     gamma = new_gamma
     print(f'The iteration took {(time.time_ns() - t1) / 1000000000} seconds.')
+    print(Err)
