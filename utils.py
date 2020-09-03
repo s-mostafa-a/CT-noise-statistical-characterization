@@ -21,6 +21,21 @@ def central_gamma_pdf(y, alpha, beta):
     return form / denominator
 
 
+def form_of_equation_18(y, phi, alpha, beta):
+    return phi * central_gamma_pdf(y, alpha=alpha, beta=beta)
+
+
+def broadcast_tile(matrix, h, w):
+    m, n = matrix.shape[0] * h, matrix.shape[1] * w
+    return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1),
+                           (matrix.shape[0], h, matrix.shape[1], w)).reshape(m, n)
+
+
+def equation_18_on_vector_of_j_elements(y_arr, mini_theta_arr):
+    form_of_equation_18_vectorized = np.vectorize(form_of_equation_18)
+    return form_of_equation_18_vectorized(y_arr, mini_theta_arr[0], mini_theta_arr[1], mini_theta_arr[2])
+
+
 class CTScan(object):
     def __init__(self, path):
         path = path
@@ -52,3 +67,16 @@ class CTScan(object):
         MAX_BOUND = 400.
         self._image[self._image > MAX_BOUND] = MAX_BOUND
         self._image[self._image < MIN_BOUND] = MIN_BOUND
+
+
+class Neighborhood:
+    def __init__(self, Y, gamma, neighborhood_size):
+        self._Y = Y
+        self._gamma = gamma
+        self._neighborhood_size = neighborhood_size
+
+    def compute_for_neighbors(self):
+        pass
+
+    def get_matrix(self):
+        pass
