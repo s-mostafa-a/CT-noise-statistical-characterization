@@ -6,13 +6,13 @@ import SimpleITK as sitk
 
 
 def non_central_gamma_pdf(x, alpha, beta, delta):
-    assert x >= delta
+    assert x >= delta, f'''x must be more-or-equal than delta. x: {x}, delta: {delta}'''
     y = x - delta
     return central_gamma_pdf(y=y, alpha=alpha, beta=beta)
 
 
 def central_gamma_pdf(y, alpha, beta):
-    assert alpha > 0 and beta > 0, f'alpha and beta must be more than zero. alpha: {alpha}, beta: {beta}'
+    assert alpha > 0 and beta > 0, f'''Alpha and Beta must be more than zero. Alpha: {alpha}, Beta: {beta}'''
     form = math.pow(y, (alpha - 1)) * math.exp(-y / beta)
     denominator = math.pow(beta, alpha) * math.gamma(alpha)
     return form / denominator
@@ -68,9 +68,9 @@ class CTScan(object):
 
 class ComputeBasedOnNeighborhood:
     def __init__(self, Y, gamma, mu, neighborhood_size):
-        assert len(Y.shape) == 2
-        assert Y.shape[0] % neighborhood_size == 0
-        assert Y.shape[1] % neighborhood_size == 0
+        assert len(Y.shape) == 2, f'''Image must be 2d'''
+        assert Y.shape[0] % neighborhood_size == 0, f'''Image's 1st axis must be dividable by the neighborhood size'''
+        assert Y.shape[1] % neighborhood_size == 0, f'''Image's 2nd axis must be dividable by the neighborhood size'''
         self._Y = Y
         self._gamma = gamma
         self._neighborhood_size = neighborhood_size
