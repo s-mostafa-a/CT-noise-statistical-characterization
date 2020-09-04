@@ -35,6 +35,7 @@ for component in range(J_3):
                 gamma[i, j, component]
 first_mini_sclm = form_of_first_mini_sclm / denominator_summation
 second_mini_sclm = form_of_second_mini_sclm / denominator_summation
+theta[:, :, 0, :] = theta[:, :, 0, :] / np.sum(theta[:, :, 0, :], axis=2).reshape((theta.shape[0], theta.shape[1], 1))
 first_sclm = np.sum(broadcast_tile(first_mini_sclm, NEIGHBORHOOD_SIZE, NEIGHBORHOOD_SIZE, 1) * theta[:, :, 0, :],
                     axis=2)
 second_sclm = np.sum(broadcast_tile(second_mini_sclm, NEIGHBORHOOD_SIZE, NEIGHBORHOOD_SIZE, 1) * theta[:, :, 0, :],
