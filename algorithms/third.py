@@ -13,10 +13,10 @@ MU_3 = [340 - DELTA_3, 240 - DELTA_3, 100 - DELTA_3, 0 - DELTA_3, -160 - DELTA_3
 J_3 = len(MU_3)
 NEIGHBORHOOD_SIZE = 28
 
-img = np.load(f'''../sample/img.npy''')
-# We know that img.shape is (280, 364,364)
+img = np.load(f'''../resources/2d_img.npy''')
+# We know that img.shape is (364,364)
 # so we set the neighborhood size to 28
-X_3 = img[140, :, :]
+X_3 = img
 Y_3 = X_3 - DELTA_3
 theta, gamma = run_second_algorithm(Y_3, NEIGHBORHOOD_SIZE)
 C = 2
