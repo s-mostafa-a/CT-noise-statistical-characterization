@@ -15,9 +15,10 @@ MAX_ITER_1 = 20
 TOL_1 = 0.1
 
 
-def run(x):
-    number_of_rvs = len(x)
-    y = x - DELTA_1
+def run(y, non_central=False):
+    number_of_rvs = len(y)
+    if non_central:
+        y = y - DELTA_1
     not_normalized_phi = np.random.random(J_1)
     sum_of_phis = sum(not_normalized_phi)
     theta = {'phi': [i / sum_of_phis for i in not_normalized_phi], 'alpha': list(range(1, J_1 + 1)),
@@ -58,4 +59,4 @@ def run(x):
         t_n = np.array([np.array(alphas), np.array(betas), np.array(phis)])
         err_1 = np.linalg.norm(t_n - t_p) / np.linalg.norm(t_p)
         theta = {'phi': phis, 'alpha': alphas, 'beta': betas}
-    return theta
+    return theta, gamma

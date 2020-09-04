@@ -1,8 +1,6 @@
-import time
-
 import numpy as np
 
-from resources.utils import equation_18_on_vector_of_j_elements, ComputeBasedOnNeighborhood
+from resources.utils import equation_18_on_vector_of_j_elements, ComputeThetaGammaBasedOnNeighborhood
 
 # min HU
 DELTA_2 = -1024
@@ -15,8 +13,9 @@ MAX_ITER_2 = 20
 TOL_2 = 1
 
 
-def run(x, neighborhood_size):
-    y = x - DELTA_2
+def run(y, neighborhood_size, non_central=False):
+    if non_central:
+        y = y - DELTA_2
     err = np.Infinity
     shape_of_theta = tuple(list(y.shape) + [3, J_2])
     shape_of_gamma = tuple(list(y.shape) + [J_2])
@@ -32,11 +31,10 @@ def run(x, neighborhood_size):
         for j, b in enumerate(a):
             to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, theta[i, j]).reshape(1, -1)
             gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
-
     n = 0
     while err > TOL_2 and n < MAX_ITER_2:
         n += 1
-        nbh = ComputeBasedOnNeighborhood(y, gamma, MU_2, neighborhood_size)
+        nbh = ComputeThetaGammaBasedOnNeighborhood(y, gamma, MU_2, neighborhood_size)
         nbh.compute_for_neighbors()
         new_theta = nbh.get_theta()
         new_gamma = nbh.get_gamma()
@@ -44,4 +42,4 @@ def run(x, neighborhood_size):
         err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
         theta = new_theta
         gamma = new_gamma
-    return theta
+    return theta, gamma

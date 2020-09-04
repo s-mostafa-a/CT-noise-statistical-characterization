@@ -66,7 +66,7 @@ class CTScan(object):
         self._image[self._image < MIN_BOUND] = MIN_BOUND
 
 
-class ComputeBasedOnNeighborhood:
+class ComputeThetaGammaBasedOnNeighborhood:
     def __init__(self, Y, gamma, mu, neighborhood_size):
         assert len(Y.shape) == 2, f'''Image must be 2d'''
         assert Y.shape[0] % neighborhood_size == 0, f'''Image's 1st axis must be dividable by the neighborhood size'''
