@@ -10,7 +10,7 @@ MU_2 = [340 - DELTA_2, 240 - DELTA_2, 100 - DELTA_2, 0 - DELTA_2, -160 - DELTA_2
 J_2 = len(MU_2)
 MAX_ITER_2 = 20
 # Tolerance
-TOL_2 = 1
+TOL_2 = 0.01
 
 
 def run(y, neighborhood_size, non_central=False):

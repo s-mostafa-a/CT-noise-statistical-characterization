@@ -13,10 +13,10 @@ print(theta_1)
 #################################
 # second algorithm
 
-img = np.load(f'''./resources/2d_img.npy''')
+img = np.load(f'''./resources/2d_img_2.npy''')
 # We know that img.shape is (364,364)
 # so we set the neighborhood size to 28
-neighborhood_size = 28
+neighborhood_size = 32
 X_2 = img
 
 theta_2, gamma_2 = run_second_algorithm(X_2, neighborhood_size, non_central=True)
