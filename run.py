@@ -14,8 +14,8 @@ print(theta_1)
 # second algorithm
 
 img = np.load(f'''./resources/2d_img_2.npy''')
-# We know that img.shape is (364,364)
-# so we set the neighborhood size to 28
+# We know that img.shape is (512,512)
+# so we set the neighborhood size to 32
 neighborhood_size = 32
 X_2 = img
 

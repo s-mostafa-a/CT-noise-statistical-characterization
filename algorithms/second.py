@@ -1,6 +1,6 @@
 import numpy as np
 
-from resources.utils import equation_18_on_vector_of_j_elements, ComputeThetaGammaBasedOnNeighborhood
+from utility.utils import equation_18_on_vector_of_j_elements, ComputeThetaGammaBasedOnNeighborhood
 
 # min HU
 DELTA_2 = -1024

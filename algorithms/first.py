@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-from resources.utils import central_gamma_pdf
+from utility.utils import central_gamma_pdf
 
 # min HU
 DELTA_1 = -1024

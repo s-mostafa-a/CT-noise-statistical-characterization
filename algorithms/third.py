@@ -4,7 +4,7 @@ from algorithms.second import run as run_second_algorithm
 import matplotlib.pyplot as plt
 
 # min HU
-from resources.utils import broadcast_tile
+from utility.utils import broadcast_tile
 
 DELTA_3 = -1024
 # Mu for 9 components
