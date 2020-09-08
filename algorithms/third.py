@@ -6,20 +6,21 @@ import matplotlib.pyplot as plt
 # min HU
 from utility.utils import broadcast_tile
 
-DELTA_3 = -1024
+DELTA_3 = -1025
 # Mu for 9 components
 MU_3 = [340 - DELTA_3, 240 - DELTA_3, 100 - DELTA_3, 0 - DELTA_3, -160 - DELTA_3, -370 - DELTA_3, -540 - DELTA_3,
         -810 - DELTA_3, -987 - DELTA_3]
+# MU_3 = [-1000 - DELTA_3, -870 - DELTA_3, -75 - DELTA_3, 0 - DELTA_3]
 J_3 = len(MU_3)
-NEIGHBORHOOD_SIZE = 28
+NEIGHBORHOOD_SIZE = 512
 
-img = np.load(f'''../resources/2d_img.npy''')
+img = np.load(f'''../resources/my_lungs.npy''')
 # We know that img.shape is (364,364)
 # so we set the neighborhood size to 28
 X_3 = img
 Y_3 = X_3 - DELTA_3
 theta, gamma = run_second_algorithm(Y_3, NEIGHBORHOOD_SIZE)
-C = 2
+C = 10
 # sclm: sample_condition_local_moment
 form_of_first_mini_sclm = np.ones((Y_3.shape[0] // NEIGHBORHOOD_SIZE, Y_3.shape[0] // NEIGHBORHOOD_SIZE, J_3))
 form_of_second_mini_sclm = np.ones((Y_3.shape[0] // NEIGHBORHOOD_SIZE, Y_3.shape[0] // NEIGHBORHOOD_SIZE, J_3))
@@ -43,10 +44,9 @@ second_sclm = np.sum(broadcast_tile(second_mini_sclm, NEIGHBORHOOD_SIZE, NEIGHBO
 var_of_radical_y = second_sclm - np.power(first_sclm, 2)
 stable_y = C * (np.sqrt(Y_3) - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
 
-np.save('../sample/stable_img.npy', stable_y)
+np.save('../resources/stable_my_lungs.npy', stable_y)
 plt.imshow(stable_y, cmap=plt.cm.bone)
 plt.show()
 
-np.save('../sample/nc_img.npy', Y_3)
 plt.imshow(Y_3, cmap=plt.cm.bone)
 plt.show()

@@ -3,10 +3,12 @@ import numpy as np
 from utility.utils import equation_18_on_vector_of_j_elements, ComputeThetaGammaBasedOnNeighborhood
 
 # min HU
-DELTA_2 = -1024
+DELTA_2 = -1025
 # Mu for 9 components
 MU_2 = [340 - DELTA_2, 240 - DELTA_2, 100 - DELTA_2, 0 - DELTA_2, -160 - DELTA_2, -370 - DELTA_2, -540 - DELTA_2,
         -810 - DELTA_2, -987 - DELTA_2]
+# MU_2 = [-1000 - DELTA_2, -870 - DELTA_2, -75 - DELTA_2, 0 - DELTA_2]
+
 J_2 = len(MU_2)
 MAX_ITER_2 = 20
 # Tolerance
