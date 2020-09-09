@@ -9,5 +9,5 @@ The original image:
 
 The stabilized image:
 
-![stabilized img](./resources/stable_my_lungs.png) 
+![stabilized img](./resources/stabled_my_lungs.png) 
 
