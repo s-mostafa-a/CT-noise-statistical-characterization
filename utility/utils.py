@@ -22,10 +22,16 @@ def form_of_equation_18(y, phi, alpha, beta):
     return phi * central_gamma_pdf(y, alpha=alpha, beta=beta)
 
 
-def broadcast_tile(matrix, h, w, d):
+def broadcast_3d_tile(matrix, h, w, d):
     m, n, o = matrix.shape[0] * h, matrix.shape[1] * w, matrix.shape[2] * d
     return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1, matrix.shape[2], 1),
                            (matrix.shape[0], h, matrix.shape[1], w, matrix.shape[2], d)).reshape(m, n, o)
+
+
+def broadcast_2d_tile(matrix, h, w):
+    m, n = matrix.shape[0] * h, matrix.shape[1] * w
+    return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1),
+                           (matrix.shape[0], h, matrix.shape[1], w)).reshape(m, n)
 
 
 def equation_18_on_vector_of_j_elements(y_arr, mini_theta_arr):
@@ -66,18 +72,57 @@ class CTScan(object):
         self._image[self._image < MIN_BOUND] = MIN_BOUND
 
 
-class ComputeThetaGammaBasedOnNeighborhood:
-    def __init__(self, Y, gamma, mu, neighborhood_size):
-        assert len(Y.shape) == 2, f'''Image must be 2d'''
-        assert Y.shape[0] % neighborhood_size == 0, f'''Image's 1st axis must be dividable by the neighborhood size'''
-        assert Y.shape[1] % neighborhood_size == 0, f'''Image's 2nd axis must be dividable by the neighborhood size'''
+class ComputeThetaGammaBasedOn1DNeighborhood:
+    def __init__(self, Y, gamma, mu):
+        assert len(Y.shape) == 1, f'''array must be 1d'''
         self._Y = Y
         self._gamma = gamma
-        self._neighborhood_size = neighborhood_size
+        self._J = gamma.shape[1]
+        self.mini_alpha = np.ones((1, self._J))
+        self.mini_beta = np.ones((1, self._J))
+        self.mini_phi = np.ones((1, self._J))
+        self._mu = mu
+        self._new_theta = None
+
+    def compute_for_neighbors(self):
+        first_form_summation = np.zeros(self.mini_alpha.shape)
+        second_form_summation = np.zeros(self.mini_alpha.shape)
+        denominator_summation = np.zeros(self.mini_alpha.shape)
+        for component in range(self._J):
+            for i in range(self._Y.shape[0]):
+                first_form_summation[0, component] += self._gamma[i, component] * self._Y[i] / self._mu[component]
+                second_form_summation[0, component] += self._gamma[i, component] * math.log(
+                    self._Y[i] / self._mu[component])
+                denominator_summation[0, component] += self._gamma[i, component]
+        self.mini_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
+        self.mini_beta = np.array(self._mu) / self.mini_alpha
+        self.mini_phi = denominator_summation
+
+    def get_theta(self):
+        phi = broadcast_2d_tile(self.mini_phi, self._Y.shape[0], 1)
+        alpha = broadcast_2d_tile(self.mini_alpha, self._Y.shape[0], 1)
+        beta = broadcast_2d_tile(self.mini_beta, self._Y.shape[0], 1)
+        theta = np.array([phi, alpha, beta])
+        self._new_theta = np.moveaxis(theta, [0, 1, 2], [1, 0, 2])
+        return self._new_theta
+
+    def get_gamma(self):
+        gamma = np.zeros(shape=self._gamma.shape)
+        for i, a in enumerate(self._Y):
+            to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, self._new_theta[i]).reshape(1, -1)
+            gamma[i] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
+        return gamma
+
+
+class ComputeThetaGammaBasedOn2DNeighborhood:
+    def __init__(self, Y, gamma, mu):
+        assert len(Y.shape) == 2, f'''Image must be 2d'''
+        self._Y = Y
+        self._gamma = gamma
         self._J = gamma.shape[2]
-        self.mini_alpha = np.ones((Y.shape[0] // neighborhood_size, Y.shape[0] // neighborhood_size, self._J))
-        self.mini_beta = np.ones((Y.shape[0] // neighborhood_size, Y.shape[0] // neighborhood_size, self._J))
-        self.mini_phi = np.ones((Y.shape[0] // neighborhood_size, Y.shape[0] // neighborhood_size, self._J))
+        self.mini_alpha = np.ones((1, 1, self._J))
+        self.mini_beta = np.ones((1, 1, self._J))
+        self.mini_phi = np.ones((1, 1, self._J))
         self._mu = mu
         self._new_theta = None
 
@@ -88,20 +133,20 @@ class ComputeThetaGammaBasedOnNeighborhood:
         for component in range(self._J):
             for i in range(self._Y.shape[0]):
                 for j in range(self._Y.shape[1]):
-                    first_form_summation[i // self._neighborhood_size, j // self._neighborhood_size, component] += \
+                    first_form_summation[0, 0, component] += \
                         self._gamma[i, j, component] * self._Y[i, j] / self._mu[component]
-                    second_form_summation[i // self._neighborhood_size, j // self._neighborhood_size, component] += \
+                    second_form_summation[0, 0, component] += \
                         self._gamma[i, j, component] * math.log(self._Y[i, j] / self._mu[component])
-                    denominator_summation[i // self._neighborhood_size, j // self._neighborhood_size, component] += \
+                    denominator_summation[0, 0, component] += \
                         self._gamma[i, j, component]
         self.mini_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
         self.mini_beta = np.array(self._mu) / self.mini_alpha
         self.mini_phi = denominator_summation
 
     def get_theta(self):
-        phi = broadcast_tile(self.mini_phi, self._neighborhood_size, self._neighborhood_size, 1)
-        alpha = broadcast_tile(self.mini_alpha, self._neighborhood_size, self._neighborhood_size, 1)
-        beta = broadcast_tile(self.mini_beta, self._neighborhood_size, self._neighborhood_size, 1)
+        phi = broadcast_3d_tile(self.mini_phi, self._Y.shape[0], self._Y.shape[1], 1)
+        alpha = broadcast_3d_tile(self.mini_alpha, self._Y.shape[0], self._Y.shape[1], 1)
+        beta = broadcast_3d_tile(self.mini_beta, self._Y.shape[0], self._Y.shape[1], 1)
         theta = np.array([phi, alpha, beta])
         self._new_theta = np.moveaxis(theta, [0, 1, 2, 3], [2, 0, 1, 3])
         return self._new_theta
