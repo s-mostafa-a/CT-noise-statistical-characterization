@@ -34,7 +34,7 @@ second_mini_sclm = form_of_second_mini_sclm / denominator_summation
 theta[:, :, 0, :] = theta[:, :, 0, :] / np.sum(theta[:, :, 0, :], axis=2).reshape((theta.shape[0], theta.shape[1], 1))
 first_sclm = np.sum(broadcast_3d_tile(first_mini_sclm, Y.shape[0], Y.shape[1], 1) * theta[:, :, 0, :], axis=2)
 second_sclm = np.sum(broadcast_3d_tile(second_mini_sclm, Y.shape[0], Y.shape[1], 1) * theta[:, :, 0, :], axis=2)
-var_of_radical_y = np.sqrt(np.var(np.sqrt(Y)))
+var_of_radical_y = second_sclm - np.power(first_sclm, 2)
 stable_y = C * (np.sqrt(Y) - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
 
 np.save('../resources/stabled_my_lungs.npy', stable_y)
