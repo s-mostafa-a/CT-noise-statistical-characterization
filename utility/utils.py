@@ -74,7 +74,7 @@ class CTScan(object):
 
 class ComputeThetaGammaBasedOn1DNeighborhood:
     def __init__(self, Y, gamma, mu):
-        assert len(Y.shape) == 1, f'''array must be 1d'''
+        assert len(Y.shape) == 1, f'''The input array must be 1d'''
         self._Y = Y
         self._gamma = gamma
         self._J = gamma.shape[1]
@@ -113,7 +113,7 @@ class ComputeThetaGammaBasedOn1DNeighborhood:
 
 class ComputeThetaGammaBasedOn2DNeighborhood:
     def __init__(self, Y, gamma, mu):
-        assert len(Y.shape) == 2, f'''Image must be 2d'''
+        assert len(Y.shape) == 2, f'''The input image must be 2d'''
         self._Y = Y
         self._gamma = gamma
         self._J = gamma.shape[2]
