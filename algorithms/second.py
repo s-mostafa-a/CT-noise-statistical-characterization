@@ -9,7 +9,7 @@ def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
     if non_central:
         y = y - delta
     err = np.Infinity
-    shape_of_theta = tuple(list(y.shape) + [3, length_of_j])
+    shape_of_theta = (1, 1, 3, length_of_j)
     shape_of_gamma = tuple(list(y.shape) + [length_of_j])
     not_normalized_phi = np.random.random(length_of_j)
     sum_of_phis = sum(not_normalized_phi)
@@ -21,7 +21,7 @@ def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
     gamma = np.zeros(shape=shape_of_gamma)
     for i, a in enumerate(y):
         for j, b in enumerate(a):
-            to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, theta[i, j]).reshape(1, -1)
+            to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, theta[0, 0]).reshape(1, -1)
             gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
     n = 0
     while err > tol and n < max_iter:
@@ -30,7 +30,7 @@ def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
         nbh.compute_for_neighbors()
         new_theta = nbh.get_theta()
         new_gamma = nbh.get_gamma()
-        # print(np.linalg.norm(theta))
+        print(np.linalg.norm(theta))
         err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
         theta = new_theta
         gamma = new_gamma

@@ -8,7 +8,7 @@ def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
     if non_central:
         y = y - delta
     err = np.Infinity
-    shape_of_theta = tuple(list(y.shape) + [3, length_of_j])
+    shape_of_theta = (1, 3, length_of_j)
     shape_of_gamma = tuple(list(y.shape) + [length_of_j])
     not_normalized_phi = np.random.random(length_of_j)
     sum_of_phis = sum(not_normalized_phi)
@@ -19,7 +19,7 @@ def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
          [mu[j] / random_alphas[j] for j in range(length_of_j)]])
     gamma = np.zeros(shape=shape_of_gamma)
     for i, a in enumerate(y):
-        to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, theta[i]).reshape(1, -1)
+        to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, theta[0]).reshape(1, -1)
         gamma[i] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
     n = 0
     while err > tol and n < max_iter:

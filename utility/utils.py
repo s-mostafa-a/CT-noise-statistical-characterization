@@ -99,17 +99,14 @@ class ComputeThetaGammaBasedOn1DNeighborhood:
         self.mini_phi = denominator_summation
 
     def get_theta(self):
-        phi = broadcast_2d_tile(self.mini_phi, self._Y.shape[0], 1)
-        alpha = broadcast_2d_tile(self.mini_alpha, self._Y.shape[0], 1)
-        beta = broadcast_2d_tile(self.mini_beta, self._Y.shape[0], 1)
-        theta = np.array([phi, alpha, beta])
+        theta = np.array([self.mini_phi, self.mini_alpha, self.mini_beta])
         self._new_theta = np.moveaxis(theta, [0, 1, 2], [1, 0, 2])
         return self._new_theta
 
     def get_gamma(self):
         gamma = np.zeros(shape=self._gamma.shape)
         for i, a in enumerate(self._Y):
-            to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, self._new_theta[i]).reshape(1, -1)
+            to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, self._new_theta[0]).reshape(1, -1)
             gamma[i] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
         return gamma
 
@@ -144,10 +141,7 @@ class ComputeThetaGammaBasedOn2DNeighborhood:
         self.mini_phi = denominator_summation
 
     def get_theta(self):
-        phi = broadcast_3d_tile(self.mini_phi, self._Y.shape[0], self._Y.shape[1], 1)
-        alpha = broadcast_3d_tile(self.mini_alpha, self._Y.shape[0], self._Y.shape[1], 1)
-        beta = broadcast_3d_tile(self.mini_beta, self._Y.shape[0], self._Y.shape[1], 1)
-        theta = np.array([phi, alpha, beta])
+        theta = np.array([self.mini_phi, self.mini_alpha, self.mini_beta])
         self._new_theta = np.moveaxis(theta, [0, 1, 2, 3], [2, 0, 1, 3])
         return self._new_theta
 
@@ -155,6 +149,6 @@ class ComputeThetaGammaBasedOn2DNeighborhood:
         gamma = np.zeros(shape=self._gamma.shape)
         for i, a in enumerate(self._Y):
             for j, b in enumerate(a):
-                to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, self._new_theta[i, j]).reshape(1, -1)
+                to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, self._new_theta[0, 0]).reshape(1, -1)
                 gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
         return gamma
