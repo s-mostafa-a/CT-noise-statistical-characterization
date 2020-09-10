@@ -17,18 +17,13 @@ img = np.load(f'''../resources/my_lungs.npy''')
 
 X = img
 Y = X - DELTA
-theta, gamma = run_second_algorithm(Y, mu=MU)
+theta, gamma = run_second_algorithm(Y, mu=MU, max_iter=5)
 C = 10
 # sclm: sample_conditioned_local_moment
-form_of_first_mini_sclm = np.ones((1, 1, J))
-form_of_second_mini_sclm = np.ones((1, 1, J))
-denominator_summation = np.ones((1, 1, J))
-for component in range(J):
-    for i in range(Y.shape[0]):
-        for j in range(Y.shape[1]):
-            form_of_first_mini_sclm[0, 0, component] += math.sqrt(Y[i, j]) * gamma[i, j, component]
-            form_of_second_mini_sclm[0, 0, component] += Y[i, j] * gamma[i, j, component]
-            denominator_summation[0, 0, component] += gamma[i, j, component]
+form_of_first_mini_sclm = np.sum(np.sqrt(np.sqrt(np.expand_dims(Y, axis=-1)) * gamma) * gamma, axis=(0, 1)).reshape(
+    (1, 1, J))
+form_of_second_mini_sclm = np.sum(np.sqrt(np.expand_dims(Y, axis=-1) * gamma) * gamma, axis=(0, 1)).reshape((1, 1, J))
+denominator_summation = np.sum(gamma, axis=(0, 1)).reshape((1, 1, J))
 first_mini_sclm = form_of_first_mini_sclm / denominator_summation
 second_mini_sclm = form_of_second_mini_sclm / denominator_summation
 theta[:, :, 0, :] = theta[:, :, 0, :] / np.sum(theta[:, :, 0, :], axis=2).reshape((theta.shape[0], theta.shape[1], 1))
@@ -37,7 +32,7 @@ second_sclm = np.sum(broadcast_3d_tile(second_mini_sclm, Y.shape[0], Y.shape[1],
 var_of_radical_y = second_sclm - np.power(first_sclm, 2)
 stable_y = C * (np.sqrt(Y) - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
 
-np.save('../resources/stabled_my_lungs.npy', stable_y)
+# np.save('../resources/stabled_my_lungs.npy', stable_y)
 plt.imshow(stable_y, cmap=plt.cm.bone)
 plt.show()
 

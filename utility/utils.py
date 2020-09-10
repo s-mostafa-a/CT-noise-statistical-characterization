@@ -124,31 +124,24 @@ class ComputeThetaGammaBasedOn2DNeighborhood:
         self._new_theta = None
 
     def compute_for_neighbors(self):
-        first_form_summation = np.zeros(self.mini_alpha.shape)
-        second_form_summation = np.zeros(self.mini_alpha.shape)
-        denominator_summation = np.zeros(self.mini_alpha.shape)
-        for component in range(self._J):
-            for i in range(self._Y.shape[0]):
-                for j in range(self._Y.shape[1]):
-                    first_form_summation[0, 0, component] += \
-                        self._gamma[i, j, component] * self._Y[i, j] / self._mu[component]
-                    second_form_summation[0, 0, component] += \
-                        self._gamma[i, j, component] * math.log(self._Y[i, j] / self._mu[component])
-                    denominator_summation[0, 0, component] += \
-                        self._gamma[i, j, component]
+        first_form_summation = np.sum(self._gamma * (np.expand_dims(self._Y, axis=-1) / self._mu), axis=(0, 1)).reshape(
+            (1, 1, self._J))
+        second_form_summation = np.sum(self._gamma * np.log(np.expand_dims(self._Y, axis=-1) / self._mu),
+                                       axis=(0, 1)).reshape((1, 1, self._J))
+        denominator_summation = np.sum(self._gamma, axis=(0, 1)).reshape((1, 1, self._J))
         self.mini_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
+        print('alpha', self.mini_alpha)
         self.mini_beta = np.array(self._mu) / self.mini_alpha
+        print('beta', self.mini_beta)
         self.mini_phi = denominator_summation
 
-    def get_theta(self):
+    def get_gamma_and_theta(self):
         theta = np.array([self.mini_phi, self.mini_alpha, self.mini_beta])
-        self._new_theta = np.moveaxis(theta, [0, 1, 2, 3], [2, 0, 1, 3])
-        return self._new_theta
+        new_theta = np.moveaxis(theta, [0, 1, 2, 3], [2, 0, 1, 3])
 
-    def get_gamma(self):
         gamma = np.zeros(shape=self._gamma.shape)
         for i, a in enumerate(self._Y):
             for j, b in enumerate(a):
-                to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, self._new_theta[0, 0]).reshape(1, -1)
+                to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, new_theta[0, 0]).reshape(1, -1)
                 gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
-        return gamma
+        return gamma, new_theta

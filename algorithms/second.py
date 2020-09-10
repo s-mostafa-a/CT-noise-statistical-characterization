@@ -28,9 +28,8 @@ def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
         n += 1
         nbh = ComputeThetaGammaBasedOn2DNeighborhood(y, gamma, mu)
         nbh.compute_for_neighbors()
-        new_theta = nbh.get_theta()
-        new_gamma = nbh.get_gamma()
-        print(np.linalg.norm(theta))
+        new_gamma, new_theta = nbh.get_gamma_and_theta()
+        print(n)
         err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
         theta = new_theta
         gamma = new_gamma
