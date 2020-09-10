@@ -4,19 +4,19 @@ from utility.utils import equation_18_on_vector_of_j_elements, ComputeThetaGamma
 
 
 def run(y, mu, non_central=False, delta=-1025, max_iter=20, tol=0.01):
-    length_of_j = len(mu)
+    size_of_j = len(mu)
     if non_central:
         y = y - delta
     err = np.Infinity
-    shape_of_theta = (1, 3, length_of_j)
-    shape_of_gamma = tuple(list(y.shape) + [length_of_j])
-    not_normalized_phi = np.random.random(length_of_j)
+    shape_of_theta = (1, 3, size_of_j)
+    shape_of_gamma = tuple(list(y.shape) + [size_of_j])
+    not_normalized_phi = np.random.random(size_of_j)
     sum_of_phis = sum(not_normalized_phi)
     theta = np.zeros(shape=shape_of_theta)
-    random_alphas = list(range(1, length_of_j + 1))
+    random_alphas = list(range(1, size_of_j + 1))
     theta[:, :, :] = np.array(
         [[i / sum_of_phis for i in not_normalized_phi], random_alphas,
-         [mu[j] / random_alphas[j] for j in range(length_of_j)]])
+         [mu[j] / random_alphas[j] for j in range(size_of_j)]])
     gamma = np.zeros(shape=shape_of_gamma)
     for i, a in enumerate(y):
         to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, theta[0]).reshape(1, -1)
