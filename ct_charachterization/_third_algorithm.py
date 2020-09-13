@@ -10,10 +10,8 @@ def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10
     y = x - delta
     theta, gamma = run_second_algorithm(y, centered_mu=centered_mu, delta=delta, max_iter=max_iter, tol=tol)
     # sclm: sample_conditioned_local_moment
-    form_of_first_mini_sclm = np.sum(np.sqrt(np.sqrt(np.expand_dims(y, axis=-1)) * gamma) * gamma, axis=(0, 1)).reshape(
-        (1, 1, big_jay))
-    form_of_second_mini_sclm = np.sum(np.sqrt(np.expand_dims(y, axis=-1) * gamma) * gamma, axis=(0, 1)).reshape(
-        (1, 1, big_jay))
+    form_of_first_mini_sclm = np.sum(np.sqrt(np.expand_dims(y, axis=-1)) * gamma, axis=(0, 1)).reshape((1, 1, big_jay))
+    form_of_second_mini_sclm = np.sum(np.expand_dims(y, axis=-1) * gamma, axis=(0, 1)).reshape((1, 1, big_jay))
     denominator_summation = np.sum(gamma, axis=(0, 1)).reshape((1, 1, big_jay))
     first_mini_sclm = form_of_first_mini_sclm / denominator_summation
     second_mini_sclm = form_of_second_mini_sclm / denominator_summation
