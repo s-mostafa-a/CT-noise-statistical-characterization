@@ -1,7 +1,7 @@
 import numpy as np
 
-from charachterization_algorithms._mixture_model import NonCentralGammaMixtureModel
-from charachterization_algorithms.utility.utils import central_gamma_pdf
+from ct_charachterization._mixture_model import NonCentralGammaMixtureModel
+from ct_charachterization.utility.utils import central_gamma_pdf
 
 
 class FirstAlgorithm(NonCentralGammaMixtureModel):

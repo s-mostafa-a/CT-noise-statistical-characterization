@@ -1,6 +1,6 @@
 import numpy as np
-from charachterization_algorithms.first_algorithm import run_first_algorithm
-from charachterization_algorithms.second_algorithm import run_second_algorithm
+from ct_charachterization.first_algorithm import run_first_algorithm
+from ct_charachterization.second_algorithm import run_second_algorithm
 
 DELTA = -1025
 
