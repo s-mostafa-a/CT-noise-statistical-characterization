@@ -1,8 +1,6 @@
 import math
 
-from scipy import ndimage
 import numpy as np
-import SimpleITK as sitk
 
 
 def non_central_gamma_pdf(x, alpha, beta, delta):
@@ -37,39 +35,6 @@ def broadcast_2d_tile(matrix, h, w):
 def equation_18_on_vector_of_j_elements(y_arr, mini_theta_arr):
     form_of_equation_18_vectorized = np.vectorize(form_of_equation_18)
     return form_of_equation_18_vectorized(y_arr, mini_theta_arr[0], mini_theta_arr[1], mini_theta_arr[2])
-
-
-class CTScan(object):
-    def __init__(self, path):
-        path = path
-        self._ds = sitk.ReadImage(path)
-        self._spacing = np.array(list(reversed(self._ds.GetSpacing())))
-        self._origin = np.array(list(reversed(self._ds.GetOrigin())))
-        self._image = sitk.GetArrayFromImage(self._ds)
-
-    def preprocess(self):
-        self._resample()
-        self._normalize()
-
-    def get_image(self):
-        return self._image
-
-    def _resample(self):
-        spacing = np.array(self._spacing, dtype=np.float32)
-        new_spacing = [1, 1, 1]
-        imgs = self._image
-        new_shape = np.round(imgs.shape * spacing / new_spacing)
-        true_spacing = spacing * imgs.shape / new_shape
-        resize_factor = new_shape / imgs.shape
-        imgs = ndimage.interpolation.zoom(imgs, resize_factor, mode='nearest')
-        self._image = imgs
-        self._spacing = true_spacing
-
-    def _normalize(self):
-        MIN_BOUND = -1000
-        MAX_BOUND = 400.
-        self._image[self._image > MAX_BOUND] = MAX_BOUND
-        self._image[self._image < MIN_BOUND] = MIN_BOUND
 
 
 class ComputeThetaGammaBasedOn1DNeighborhood:
