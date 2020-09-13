@@ -21,13 +21,13 @@ def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10
     second_sclm = np.sum(broadcast_3d_tile(second_mini_sclm, y.shape[0], y.shape[1], 1) * theta[0, :], axis=2)
     var_of_radical_y = second_sclm - np.power(first_sclm, 2)
     stable_y = constant_c * (np.sqrt(y) - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
-    return stable_y
+    return stable_y, theta, gamma
 
 
 if __name__ == '__main__':
     MU = np.array([-1000, -700, -90, 50, 300])
     # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
     img = np.load(f'''../resources/my_lungs.npy''')
-    stabilized_y = run_third_algorithm(img, MU)
+    stabilized_y, _, _ = run_third_algorithm(img, MU)
     plt.imshow(stabilized_y, cmap=plt.cm.bone)
     plt.show()
