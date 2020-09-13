@@ -23,7 +23,7 @@ args = dict(
     author_email='s.mostafa.a96@gmail.com',
     url='https://github.com/s-mostafa-a/CT-noise-statistical-characterization',
     license=license,
-    packages=find_packages(include='algorithms'),
+    packages=find_packages(),
     keywords="ct scan characterization",
 )
 
