@@ -1,7 +1,7 @@
 import numpy as np
 from algorithms.second import run_second_algorithm
 import matplotlib.pyplot as plt
-from utility.utils import broadcast_3d_tile
+from algorithms.utility.utils import broadcast_3d_tile
 
 
 def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10):

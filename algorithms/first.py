@@ -1,7 +1,7 @@
 import numpy as np
 
 from algorithms._mixture_model import NonCentralGammaMixtureModel
-from utility.utils import central_gamma_pdf
+from algorithms.utility.utils import central_gamma_pdf
 
 
 class FirstAlgorithm(NonCentralGammaMixtureModel):
