@@ -1,7 +1,7 @@
 venv/
 .idea/
 __pycache__/
-sample/
 .DS_Store
 /notebooks/.ipynb_checkpoints
 resources/dicoms/
+resources/sample/

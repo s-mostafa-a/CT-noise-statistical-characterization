@@ -5,9 +5,9 @@ Currently, I am debugging the 3rd algorithm. If you are interested to see the la
 
 The original image:
 
-![original img](./resources/my_lungs.png) 
+![original img](resources/figs/my_lungs.png) 
 
 The stabilized image:
 
-![stabilized img](./resources/stabled_my_lungs.png) 
+![stabilized img](resources/figs/stabled_my_lungs.png) 
 
