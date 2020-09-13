@@ -1,7 +1,7 @@
 import numpy as np
-from algorithms.second import run_second_algorithm
+from charachterization_algorithms.second_algorithm import run_second_algorithm
 import matplotlib.pyplot as plt
-from algorithms.utility.utils import broadcast_3d_tile
+from charachterization_algorithms.utility.utils import broadcast_3d_tile
 
 
 def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10):
