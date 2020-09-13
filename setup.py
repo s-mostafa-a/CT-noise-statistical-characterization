@@ -30,4 +30,5 @@ args = dict(
 setup(install_requires=['dicom-numpy>=0.4.0',
                         'numpy>=1.19.2',
                         'SimpleITK>=1.2.4',
-                        'pydicom>=2.0.0'], **args)
+                        'pydicom>=2.0.0',
+                        'matplotlib>=3.3.1'], **args)
