@@ -74,35 +74,3 @@ class ComputeThetaGammaBasedOn1DNeighborhood:
             to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(a, self._new_theta[0]).reshape(1, -1)
             gamma[i] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
         return gamma
-
-
-class ComputeThetaGammaBasedOn2DNeighborhood:
-    def __init__(self, Y, gamma, mu):
-        assert len(Y.shape) == 2, f'''The input image must be 2d'''
-        self._Y = Y
-        self._gamma = gamma
-        self._J = gamma.shape[2]
-        self._mu = mu
-        self.mini_alpha = None
-        self.mini_beta = None
-        self.mini_phi = None
-        self._new_theta = None
-
-    def compute_for_neighbors(self):
-        first_form_summation = np.sum(self._gamma * (np.expand_dims(self._Y, axis=-1) / self._mu), axis=(0, 1)).reshape(
-            self._J)
-        second_form_summation = np.sum(self._gamma * np.log(np.expand_dims(self._Y, axis=-1) / self._mu),
-                                       axis=(0, 1)).reshape(self._J)
-        denominator_summation = np.sum(self._gamma, axis=(0, 1)).reshape(self._J)
-        self.mini_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
-        self.mini_beta = np.array(self._mu) / self.mini_alpha
-        self.mini_phi = denominator_summation
-
-    def get_gamma_and_theta(self):
-        new_theta = np.array([self.mini_phi, self.mini_alpha, self.mini_beta])
-        gamma = np.zeros(shape=self._gamma.shape)
-        for i, a in enumerate(self._Y):
-            for j, b in enumerate(a):
-                to_be_appended_on_gamma = equation_18_on_vector_of_j_elements(b, new_theta).reshape(1, -1)
-                gamma[i, j] = to_be_appended_on_gamma / np.sum(to_be_appended_on_gamma)
-        return gamma, new_theta

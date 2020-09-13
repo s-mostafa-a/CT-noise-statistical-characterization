@@ -2,11 +2,11 @@ import numpy as np
 import math
 from algorithms.second import run as run_second_algorithm
 import matplotlib.pyplot as plt
-
+import time
 # min HU
 from utility.utils import broadcast_3d_tile
 
-DELTA = -1025
+DELTA = -1030
 # Mu for 9 components
 # MU = [340 - DELTA, 240 - DELTA, 100 - DELTA, 0 - DELTA, -160 - DELTA, -370 - DELTA, -540 - DELTA,
 #       -810 - DELTA, -987 - DELTA]
@@ -17,7 +17,9 @@ img = np.load(f'''../resources/my_lungs.npy''')
 
 X = img
 Y = X - DELTA
+t1 = time.time_ns()
 theta, gamma = run_second_algorithm(Y, mu=MU, max_iter=10)
+print(f'{-(t1-time.time_ns())/1000000000} sec spent for algorithm2')
 C = 10
 # sclm: sample_conditioned_local_moment
 form_of_first_mini_sclm = np.sum(np.sqrt(np.sqrt(np.expand_dims(Y, axis=-1)) * gamma) * gamma, axis=(0, 1)).reshape(
