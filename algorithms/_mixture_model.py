@@ -24,11 +24,10 @@ class NonCentralGammaMixtureModel(object):
             y = y - delta
 
         # initial guess of parameters
-        # we assume that theta[0] = phi, theta[1] = alpha, theta[2] = beta
+        # we assume that theta[0] = pi, theta[1] = alpha, theta[2] = beta
         shape_of_theta = (3, size_of_j)
         theta = np.zeros(shape=shape_of_theta)
-        theta[:, :] = np.array(
-            [[1 / size_of_j] * size_of_j, [2] * size_of_j, [mu[j] / 2 for j in range(size_of_j)]])
+        theta[:, :] = np.array([[1 / size_of_j] * size_of_j, [2] * size_of_j, [mu[j] / 2 for j in range(size_of_j)]])
 
         # compute initial gamma
         shape_of_gamma = tuple(list(y.shape) + [size_of_j])
@@ -42,5 +41,5 @@ class NonCentralGammaMixtureModel(object):
             err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
             theta = new_theta
             gamma = new_gamma
-            print(n)
+            print('iteration: ', n)
         return theta, gamma

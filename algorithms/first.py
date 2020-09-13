@@ -29,8 +29,8 @@ class FirstAlgorithm(NonCentralGammaMixtureModel):
         denominator_summation = np.sum(gamma, axis=0).reshape(size_of_j)
         new_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
         new_beta = np.array(mu) / new_alpha
-        new_phi = denominator_summation / y.size
-        new_theta = np.array([new_phi, new_alpha, new_beta])
+        new_pi = denominator_summation / y.size
+        new_theta = np.array([new_pi, new_alpha, new_beta])
         return new_theta
 
 
