@@ -1,5 +1,5 @@
 import numpy as np
-from ct_charachterization.second_algorithm import run_second_algorithm
+from ct_charachterization._second_algorithm import run_second_algorithm
 import matplotlib.pyplot as plt
 from ct_charachterization.utility.utils import broadcast_3d_tile
 
