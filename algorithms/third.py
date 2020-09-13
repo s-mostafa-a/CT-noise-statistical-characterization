@@ -1,6 +1,5 @@
 import numpy as np
-import math
-from algorithms.second import run as run_second_algorithm
+from algorithms.second import run_second_algorithm
 import matplotlib.pyplot as plt
 import time
 # min HU
@@ -19,7 +18,7 @@ X = img
 Y = X - DELTA
 t1 = time.time_ns()
 theta, gamma = run_second_algorithm(Y, mu=MU, max_iter=10)
-print(f'{-(t1-time.time_ns())/1000000000} sec spent for algorithm2')
+print(f'{-(t1 - time.time_ns()) / 1000000000} sec spent for algorithm2')
 C = 10
 # sclm: sample_conditioned_local_moment
 form_of_first_mini_sclm = np.sum(np.sqrt(np.sqrt(np.expand_dims(Y, axis=-1)) * gamma) * gamma, axis=(0, 1)).reshape(
