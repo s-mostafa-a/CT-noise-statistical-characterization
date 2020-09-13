@@ -4,8 +4,7 @@ from algorithms.second import run_second_algorithm
 
 DELTA = -1025
 
-MU = [340 - DELTA, 240 - DELTA, 100 - DELTA, 0 - DELTA, -160 - DELTA, -370 - DELTA, -540 - DELTA,
-      -810 - DELTA, -987 - DELTA]
+MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987]) - DELTA
 #################################
 # running the first algorithm
 # length of pixels vector

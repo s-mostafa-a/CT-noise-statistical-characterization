@@ -1,7 +1,6 @@
 import numpy as np
 from algorithms.second import run_second_algorithm
 import matplotlib.pyplot as plt
-import time
 from utility.utils import broadcast_3d_tile
 
 
@@ -9,9 +8,7 @@ def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10
     big_jay = len(mu)
     centered_mu = mu - delta
     y = x - delta
-    t1 = time.time_ns()
     theta, gamma = run_second_algorithm(y, centered_mu=centered_mu, delta=delta, max_iter=max_iter, tol=tol)
-    print(f'{(time.time_ns() - t1) / 1000000000} sec spent for algorithm2')
     # sclm: sample_conditioned_local_moment
     form_of_first_mini_sclm = np.sum(np.sqrt(np.sqrt(np.expand_dims(y, axis=-1)) * gamma) * gamma, axis=(0, 1)).reshape(
         (1, 1, big_jay))
@@ -28,7 +25,7 @@ def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10
 
 
 if __name__ == '__main__':
-    MU = np.array([-1000, -870, -75, 0])
+    MU = np.array([-1000, -700, -90, 50, 300])
     # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
     img = np.load(f'''../resources/my_lungs.npy''')
     stabilized_y = run_third_algorithm(img, MU)
