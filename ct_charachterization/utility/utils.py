@@ -16,13 +16,17 @@ def central_gamma_pdf(y, alpha, beta):
     return form / denominator
 
 
-def broadcast_3d_tile(matrix, h, w, d):
-    m, n, o = matrix.shape[0] * h, matrix.shape[1] * w, matrix.shape[2] * d
-    return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1, matrix.shape[2], 1),
-                           (matrix.shape[0], h, matrix.shape[1], w, matrix.shape[2], d)).reshape(m, n, o)
-
-
-def broadcast_2d_tile(matrix, h, w):
-    m, n = matrix.shape[0] * h, matrix.shape[1] * w
-    return np.broadcast_to(matrix.reshape(matrix.shape[0], 1, matrix.shape[1], 1),
-                           (matrix.shape[0], h, matrix.shape[1], w)).reshape(m, n)
+def broadcast_tile(matrix, times: tuple):
+    assert len(matrix.shape) == len(times), f'matrix.shape: {matrix.shape}, times: {times}'
+    lsd = tuple([matrix.shape[i] * times[i] for i in range(len(times))])
+    reshape_to = []
+    for item in matrix.shape:
+        reshape_to.append(item)
+        reshape_to.append(1)
+    reshape_to = tuple(reshape_to)
+    final_shape = []
+    for i in range(len(times)):
+        final_shape.append(matrix.shape[i])
+        final_shape.append(times[i])
+    final_shape = tuple(final_shape)
+    return np.broadcast_to(matrix.reshape(reshape_to), final_shape).reshape(lsd)
