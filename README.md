@@ -9,6 +9,6 @@ The original image:
 
 The stabilized image:
 
-![stabilized img](resources/figs/stabilized_my_lungs.jpg) 
+![stabilized img](resources/figs/stabilized_my_lungs.png) 
 
 # WORK IN PROGRESS ...

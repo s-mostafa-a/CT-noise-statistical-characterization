@@ -27,7 +27,7 @@ def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10
     first_sclm = np.sum(broadcast_tile(first_mini_sclm, br_to_shape) * theta[0, :], axis=whole_axises[-1])
     second_sclm = np.sum(broadcast_tile(second_mini_sclm, br_to_shape) * theta[0, :], axis=whole_axises[-1])
     var_of_radical_y = second_sclm - np.power(first_sclm, 2)
-    stable_y = constant_c * (y - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
+    stable_y = constant_c * (np.sqrt(y) - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
     return stable_y, theta, gamma
 
 
