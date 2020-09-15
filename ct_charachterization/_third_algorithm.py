@@ -4,11 +4,13 @@ import matplotlib.pyplot as plt
 from ct_charachterization.utility.utils import broadcast_tile
 
 
-def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10):
+def run_third_algorithm(y: np.array, mu: np.array, delta=-1030, max_iter=10, tol=0.01, constant_c=10,
+                        non_central=False):
     big_jay = len(mu)
-    centered_mu = mu - delta
-    y = x - delta
-    theta, gamma = run_first_algorithms(y, centered_mu=centered_mu, delta=delta, max_iter=max_iter, tol=tol)
+    if non_central:
+        mu = mu - delta
+        y = y - delta
+    theta, gamma = run_first_algorithms(y, mu=mu, delta=delta, max_iter=max_iter, tol=tol)
     # sclm: sample_conditioned_local_moment
     whole_axises = tuple(range(len(gamma.shape)))
     shape_of_mini_matrices = [1 for _ in y.shape]
@@ -32,13 +34,13 @@ def run_third_algorithm(x, mu, delta=-1030, max_iter=10, tol=0.01, constant_c=10
 
 
 if __name__ == '__main__':
-    MU = np.array([-1000, -700, -90, 50, 300])
+    mu_5 = np.array([-1000, -700, -90, 50, 300])
     # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
     img = np.load(f'''../resources/my_lungs.npy''')
-    stabilized_y, _, _ = run_third_algorithm(img, MU)
+    stabilized_y, _, _ = run_third_algorithm(img, mu_5, non_central=True)
     print(np.min(stabilized_y), np.mean(stabilized_y), np.max(stabilized_y))
-    plt.imshow(stabilized_y, cmap=plt.cm.bone)
+    plt.imshow(img, cmap=plt.cm.bone)
     plt.show()
 
-    plt.imshow(img, cmap=plt.cm.bone)
+    plt.imshow(stabilized_y, cmap=plt.cm.bone)
     plt.show()
