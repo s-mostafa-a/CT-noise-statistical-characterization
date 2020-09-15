@@ -1,8 +1,6 @@
 import numpy as np
 from ct_charachterization import run_first_algorithms
 
-DELTA = -1025
-
 MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
 #################################
 # running the first algorithm

@@ -29,18 +29,17 @@ def run_third_algorithm(y: np.array, mu: np.array, delta=-1030, max_iter=10, tol
     first_sclm = np.sum(broadcast_tile(first_mini_sclm, br_to_shape) * theta[0, :], axis=whole_axises[-1])
     second_sclm = np.sum(broadcast_tile(second_mini_sclm, br_to_shape) * theta[0, :], axis=whole_axises[-1])
     var_of_radical_y = second_sclm - np.power(first_sclm, 2)
-    stable_y = constant_c * (np.sqrt(y) - first_sclm) / np.sqrt(var_of_radical_y) + second_sclm
+    stable_y = (constant_c * (np.sqrt(y) - first_sclm) / np.sqrt(var_of_radical_y)) + second_sclm
     return stable_y, theta, gamma
 
 
 if __name__ == '__main__':
     mu_5 = np.array([-1000, -700, -90, 50, 300])
     # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
-    img = np.load(f'''../resources/my_lungs.npy''')
-    stabilized_y, _, _ = run_third_algorithm(img, mu_5, non_central=True)
-    print(np.min(stabilized_y), np.mean(stabilized_y), np.max(stabilized_y))
-    plt.imshow(img, cmap=plt.cm.bone)
+    img = np.load(f'''../resources/2d_img.npy''')
+    stabilized_y, _, _ = run_third_algorithm(img, mu_5, non_central=True, constant_c=10)
+    plt.imshow(img, cmap='gray')
     plt.show()
 
-    plt.imshow(stabilized_y, cmap=plt.cm.bone)
+    plt.imshow(stabilized_y, cmap='gray')
     plt.show()
