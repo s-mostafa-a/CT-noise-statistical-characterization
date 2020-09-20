@@ -34,9 +34,10 @@ def run_third_algorithm(y: np.array, mu: np.array, delta=-1030, max_iter=10, tol
 
 
 if __name__ == '__main__':
-    mu_5 = np.array([-1000, -700, -90, 50, 300])
+    # mu_5 = np.array([-1000, -700, -90, 50, 300])
+    mu_5 = np.array([-870, -90, 50])
     # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
-    img = np.load(f'''../resources/2d_img.npy''')
+    img = np.load(f'''../resources/my_lungs.npy''')[200:380, 140:390]
     stabilized_y, _, _ = run_third_algorithm(img, mu_5, non_central=True, constant_c=10)
     plt.imshow(img, cmap='gray')
     plt.show()
