@@ -1,6 +1,8 @@
 import numpy as np
 
 from ct_charachterization.utility.utils import central_gamma_pdf
+from scipy.optimize import fsolve
+from scipy.special import digamma
 
 
 def _compute_next_gamma(y, big_jay, shape_of_gamma, theta):
@@ -14,7 +16,7 @@ def _compute_next_gamma(y, big_jay, shape_of_gamma, theta):
     return new_gamma
 
 
-def _compute_next_theta(y, centered_mu, gamma):
+def _compute_next_theta(y, centered_mu, gamma, theta):
     axis = tuple(range(len(y.shape)))
     big_jay = len(centered_mu)
     first_form_summation = np.sum(gamma * (np.expand_dims(y, axis=-1) / centered_mu), axis=axis).reshape(big_jay)
@@ -22,7 +24,11 @@ def _compute_next_theta(y, centered_mu, gamma):
         big_jay)
     denominator_summation = np.sum(gamma, axis=axis).reshape(big_jay)
     # Eq. 24
-    new_alpha = (first_form_summation - second_form_summation) / denominator_summation - 1
+    right_hand_side = (first_form_summation - second_form_summation) / denominator_summation - 1
+    to_be_found = lambda alp: right_hand_side - (np.log(alp) - digamma(alp))
+    alpha_initial_guess = theta[1, :]
+    alpha_solution = fsolve(to_be_found, alpha_initial_guess)
+    new_alpha = alpha_solution
     # constraint: alpha[j] * beta[j] = mu[j]
     new_beta = np.array(centered_mu) / new_alpha
     # Eq. 22
@@ -53,7 +59,7 @@ def run_first_algorithms(y: np.array, mu: np.array, delta=-1030, max_iter=10, to
     n = 0
     while err > tol and n < max_iter:
         n += 1
-        new_theta = _compute_next_theta(y, mu, gamma)
+        new_theta = _compute_next_theta(y, mu, gamma, theta)
         new_gamma = _compute_next_gamma(y, big_jay, shape_of_gamma, theta)
         err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
         theta = new_theta

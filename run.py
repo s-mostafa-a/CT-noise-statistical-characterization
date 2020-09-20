@@ -1,7 +1,7 @@
 import numpy as np
 from ct_charachterization import run_first_algorithms
 
-MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
+MU = np.array([-1000, -700, -90, 50, 300])
 #################################
 # running the first algorithm
 # length of pixels vector
