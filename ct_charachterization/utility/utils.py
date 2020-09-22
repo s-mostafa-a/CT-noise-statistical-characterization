@@ -4,30 +4,40 @@ import numpy as np
 from functools import reduce
 
 
-def _get_hashed_number(numbers: np.array, bucket: tuple):
-    reversed_bucket = tuple(reversed(bucket))
+def _get_hashed_number(numbers_in_range_of_size: np.array, shape: tuple):
+    reversed_bucket = tuple(reversed(shape))
     res = []
     for rt in range(len(reversed_bucket)):
-        res.append(numbers % reversed_bucket[rt])
-        numbers = numbers // reversed_bucket[rt]
+        res.append(numbers_in_range_of_size % reversed_bucket[rt])
+        numbers_in_range_of_size = numbers_in_range_of_size // reversed_bucket[rt]
     res = np.array(tuple(reversed(res))).T
     return res
 
 
-def split_matrix(arr, small_block_shape: tuple):
-    times = tuple(np.array(np.array(arr.shape) / np.array(small_block_shape), dtype=int))
-    whole_number_of_times = reduce(lambda x, y: x * y, times)
-    numbers = np.array(list(range(whole_number_of_times)))
-    all_indices = _get_hashed_number(numbers, times)
+def split_matrix(mat: np.array, small_block_shape: tuple):
+    times = tuple(np.array(np.array(mat.shape) / np.array(small_block_shape), dtype=int))
+    size = reduce(lambda x, y: x * y, times)
+    range_of_size = np.array(list(range(size)))
+    all_multi_dimensional_indices = _get_hashed_number(range_of_size, times)
     patches = np.empty(times, dtype=object)
-    for index in all_indices:
-        lower = index * small_block_shape
-        upper = (index + 1) * small_block_shape
+    for multi_dimensional_index in all_multi_dimensional_indices:
+        lower = multi_dimensional_index * small_block_shape
+        upper = (multi_dimensional_index + 1) * small_block_shape
         slices = []
         for i in range(len(lower)):
             slices.append(slice(lower[i], upper[i], 1))
-        patches[tuple(index)] = arr[slices]
+        patches[tuple(multi_dimensional_index)] = mat[tuple(slices)]
     return patches
+
+
+def sum_of_each_patch(mat: np.array):
+    size = mat.size
+    range_of_size = np.array(list(range(size)))
+    all_multi_dimensional_indices = _get_hashed_number(range_of_size, mat.shape)
+    res = np.empty(mat.shape, dtype=mat[tuple(all_multi_dimensional_indices[0])].dtype)
+    for multi_dimensional_index in all_multi_dimensional_indices:
+        res[tuple(multi_dimensional_index)] = np.sum(mat[tuple(multi_dimensional_index)])
+    return res
 
 
 def non_central_gamma_pdf(x, alpha, beta, delta):
@@ -38,7 +48,7 @@ def non_central_gamma_pdf(x, alpha, beta, delta):
 
 def central_gamma_pdf(y, alpha, beta):
     assert (alpha > 0).all() and (
-                beta > 0).all(), f'''Alpha and Beta must be more than zero. Alpha: {alpha}, Beta: {beta}'''
+            beta > 0).all(), f'''Alpha and Beta must be more than zero. Alpha: {alpha}, Beta: {beta}'''
     form = np.power(y, (alpha - 1)) * np.exp(-y / beta)
     denominator = np.power(beta, alpha) * gamma(alpha)
     return form / denominator
