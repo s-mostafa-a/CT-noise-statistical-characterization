@@ -4,7 +4,7 @@ from ct_charachterization.utility.utils import central_gamma_pdf, broadcast_tile
     sum_over_each_neighborhood_on_blocked_matrix
 from scipy.optimize import fsolve
 from scipy.special import digamma
-from functools import reduce, partial
+from functools import reduce
 
 
 def _compute_next_gamma(y, theta, big_jay):
