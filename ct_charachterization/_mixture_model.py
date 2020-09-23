@@ -1,15 +1,16 @@
 import numpy as np
 
-from ct_charachterization.utility.utils import central_gamma_pdf, broadcast_tile, split_matrix, sum_of_each_patch
+from ct_charachterization.utility.utils import central_gamma_pdf, broadcast_tile, block_matrix, \
+    sum_over_each_neighborhood_on_blocked_matrix
 from scipy.optimize import fsolve
 from scipy.special import digamma
-from functools import reduce
+from functools import reduce, partial
 
 
-def _compute_next_gamma(y, big_jay, shape_of_gamma, theta):
+def _compute_next_gamma(y, theta, big_jay):
     # Eq. 18
-    axis_for_sum = len(y.shape)
-    new_gamma = np.zeros(shape=shape_of_gamma)
+    shape_of_gamma = tuple(list(y.shape) + [big_jay])
+    new_gamma = np.empty(shape=shape_of_gamma, dtype=float)
     for j in range(big_jay):
         pi = theta[0, j]
         alpha = theta[1, j]
@@ -19,36 +20,40 @@ def _compute_next_gamma(y, big_jay, shape_of_gamma, theta):
         alpha = broadcast_tile(alpha, times_to_br)
         beta = broadcast_tile(beta, times_to_br)
         new_gamma[..., j] = pi * central_gamma_pdf(y, alpha=alpha, beta=beta)
-    summation = np.expand_dims(np.sum(new_gamma, axis=axis_for_sum), axis=-1)
+    summation = np.expand_dims(np.sum(new_gamma, axis=-1), axis=-1)
     new_gamma = new_gamma / summation
     return new_gamma
 
 
-def _compute_next_theta(y, centered_mu, gamma, theta):
+def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blocking):
     big_jay = len(centered_mu)
-    alpha_for_one_j_shape = theta[1, 0, :].shape
-    shape_to_be_patched = tuple(np.array(np.array(y.shape) / np.array(alpha_for_one_j_shape), dtype=int))
-    size_of_each_neighborhood = reduce(lambda m, n: m * n, shape_to_be_patched)
-    patched_y = split_matrix(y, shape_to_be_patched)
-    patched_log_y = split_matrix(np.log(y), shape_to_be_patched)
-    new_pi = np.empty(theta[0, ...].shape)
-    new_alpha = np.empty(theta[1, ...].shape)
-    new_beta = np.empty(theta[2, ...].shape)
+    shape_of_each_neighborhood = tuple(np.array(np.array(y.shape) / np.array(y_shape_after_blocking), dtype=int))
+    size_of_each_neighborhood = reduce(lambda m, n: m * n, shape_of_each_neighborhood)
+
+    new_pi = np.empty(shape=[big_jay] + y_shape_after_blocking)
+    new_alpha = np.empty(shape=[big_jay] + y_shape_after_blocking)
+    new_beta = np.empty(shape=[big_jay] + y_shape_after_blocking)
+
+    blocked_y = block_matrix(mat=y, neighborhood_shape=shape_of_each_neighborhood)
+    blocked_log_y = block_matrix(mat=np.log(y), neighborhood_shape=shape_of_each_neighborhood)
 
     for j in range(big_jay):
-        patched_gamma_j = split_matrix(gamma[..., j], shape_to_be_patched)
-        first_numerator_summation = sum_of_each_patch(patched_gamma_j * patched_y / centered_mu[j])
-        second_numerator_summation = sum_of_each_patch(patched_gamma_j * (patched_log_y - np.log(centered_mu[j])))
-        denominator_summation = sum_of_each_patch(patched_gamma_j)
+        blocked_gamma_j = block_matrix(mat=gamma[..., j], neighborhood_shape=shape_of_each_neighborhood)
+        first_numerator_summation = sum_over_each_neighborhood_on_blocked_matrix(
+            blocked_gamma_j * blocked_y / centered_mu[j])
+        second_numerator_summation = sum_over_each_neighborhood_on_blocked_matrix(
+            blocked_gamma_j * (blocked_log_y - np.log(centered_mu[j])))
+        denominator_summation = sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j)
         # Eq. 24
         right_hand_side = (first_numerator_summation - second_numerator_summation) / denominator_summation - 1
-        to_be_found = lambda alp: right_hand_side.ravel() - (np.log(alp) - digamma(alp))
-        alpha_j = theta[1, j, ...]
-        alpha_initial_guess = alpha_j.ravel()
-        alpha_solution = fsolve(to_be_found, alpha_initial_guess)
-        new_alpha[j, ...] = alpha_solution.reshape(alpha_for_one_j_shape)
+        # TODO: ravel and reshape work fine?
+        alpha_initial_guess = previous_alpha[j, ...]
+        alpha_optimizer = lambda alpha_var: right_hand_side.reshape(right_hand_side.size) - (
+                np.log(alpha_var) - digamma(alpha_var))
+        alpha_solution = fsolve(alpha_optimizer, alpha_initial_guess.reshape(right_hand_side.size))
+        new_alpha[j, ...] = alpha_solution.reshape(y_shape_after_blocking)
         # constraint: alpha[j] * beta[j] = mu[j]
-        new_beta[j, ...] = centered_mu[j] / alpha_j
+        new_beta[j, ...] = centered_mu[j] / new_alpha[j, ...]
         # Eq. 22
         new_pi[j, ...] = denominator_summation / size_of_each_neighborhood
     new_theta = np.array([new_pi, new_alpha, new_beta])
@@ -57,10 +62,10 @@ def _compute_next_theta(y, centered_mu, gamma, theta):
 
 def run_first_algorithms(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=5, tol=0.00000001,
                          non_central=False):
-    shape_of_alpha_for_each_j_in_each_location = []
+    y_shape_after_blocking = []
     for ax in y.shape:
         assert ax % neighborhood_size == 0, f'''Input array's shape ({ax}) is not dividable to neighborhood size ({neighborhood_size}).'''  # noqa
-        shape_of_alpha_for_each_j_in_each_location.append(ax // neighborhood_size)
+        y_shape_after_blocking.append(ax // neighborhood_size)
     big_jay = len(mu)
 
     # centering the data
@@ -70,22 +75,22 @@ def run_first_algorithms(y: np.array, mu: np.array, neighborhood_size: int, delt
 
     # initial guess of parameters
     # we assume that theta[0] = pi, theta[1] = alpha, theta[2] = beta
-
-    shape_of_theta = tuple([3, big_jay] + shape_of_alpha_for_each_j_in_each_location)
-    theta = np.zeros(shape=shape_of_theta)
+    shape_of_theta = tuple([3, big_jay] + y_shape_after_blocking)
+    theta = np.empty(shape=shape_of_theta, dtype=float)
     theta_before_expansion = np.array([[1 / big_jay] * big_jay, [2] * big_jay, [mu[j] / 2 for j in range(big_jay)]])
-    for _ in range(len(shape_of_alpha_for_each_j_in_each_location)):
+    for _ in range(len(y_shape_after_blocking)):
         theta_before_expansion = np.expand_dims(theta_before_expansion, axis=-1)
     theta[...] = theta_before_expansion
     # compute initial gamma
-    shape_of_gamma = tuple(list(y.shape) + [big_jay])
-    gamma = _compute_next_gamma(y, big_jay, shape_of_gamma, theta)
+    gamma = _compute_next_gamma(y=y, theta=theta, big_jay=big_jay)
     err = np.Infinity
     n = 0
     while err > tol and n < max_iter:
         n += 1
-        new_theta = _compute_next_theta(y, mu, gamma, theta)
-        new_gamma = _compute_next_gamma(y, big_jay, shape_of_gamma, theta)
+        previous_alpha = theta[1, ...]
+        new_theta = _compute_next_theta(y=y, centered_mu=mu, gamma=gamma, previous_alpha=previous_alpha,
+                                        y_shape_after_blocking=y_shape_after_blocking)
+        new_gamma = _compute_next_gamma(y=y, theta=theta, big_jay=big_jay)
         err = np.linalg.norm(new_theta - theta) / np.linalg.norm(theta)
         theta = new_theta
         gamma = new_gamma

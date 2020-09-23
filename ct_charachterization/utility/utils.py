@@ -14,23 +14,23 @@ def _get_hashed_number(numbers_in_range_of_size: np.array, shape: tuple):
     return res
 
 
-def split_matrix(mat: np.array, small_block_shape: tuple):
-    times = tuple(np.array(np.array(mat.shape) / np.array(small_block_shape), dtype=int))
-    size = reduce(lambda x, y: x * y, times)
+def block_matrix(mat: np.array, neighborhood_shape: tuple):
+    shape_of_splitted_matrix = tuple(np.array(np.array(mat.shape) / np.array(neighborhood_shape), dtype=int))
+    size = reduce(lambda x, y: x * y, shape_of_splitted_matrix)
     range_of_size = np.array(list(range(size)))
-    all_multi_dimensional_indices = _get_hashed_number(range_of_size, times)
-    patches = np.empty(times, dtype=object)
+    all_multi_dimensional_indices = _get_hashed_number(range_of_size, shape_of_splitted_matrix)
+    splitted = np.empty(shape_of_splitted_matrix, dtype=object)
     for multi_dimensional_index in all_multi_dimensional_indices:
-        lower = multi_dimensional_index * small_block_shape
-        upper = (multi_dimensional_index + 1) * small_block_shape
+        lower = multi_dimensional_index * neighborhood_shape
+        upper = (multi_dimensional_index + 1) * neighborhood_shape
         slices = []
         for i in range(len(lower)):
             slices.append(slice(lower[i], upper[i], 1))
-        patches[tuple(multi_dimensional_index)] = mat[tuple(slices)]
-    return patches
+        splitted[tuple(multi_dimensional_index)] = mat[tuple(slices)]
+    return splitted
 
 
-def sum_of_each_patch(mat: np.array):
+def sum_over_each_neighborhood_on_blocked_matrix(mat: np.array):
     size = mat.size
     range_of_size = np.array(list(range(size)))
     all_multi_dimensional_indices = _get_hashed_number(range_of_size, mat.shape)
