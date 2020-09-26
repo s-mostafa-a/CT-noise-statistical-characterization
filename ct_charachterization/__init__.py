@@ -1,2 +1,2 @@
 from ._mixture_model import run_first_algorithms
-from ._third_algorithm import run_third_algorithm
+from ._third_algorithm import run_third_algorithm, run_third_algorithm_without_fixed_neighborhood

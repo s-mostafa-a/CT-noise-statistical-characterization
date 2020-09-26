@@ -68,3 +68,38 @@ def broadcast_tile(matrix, times: tuple):
         final_shape.append(times[i])
     final_shape = tuple(final_shape)
     return np.broadcast_to(matrix.reshape(reshape_to), final_shape).reshape(lsd)
+
+
+def expand(small_img, neighborhood_size):
+    assert len(small_img.shape) == 2, f'input image must have 2 axes, number of axes: {len(small_img.shape)}'
+    for s in small_img.shape:
+        assert neighborhood_size < s, f'neighborhood must be less than image shape, neighbor: {neighborhood_size}, shape: {small_img.shape}'  # noqa
+    big_shape = tuple(np.array(small_img.shape) * neighborhood_size)
+    big_img = np.empty(big_shape, dtype=float)
+    min_middle_i = np.ceil(neighborhood_size / 2)
+    min_middle_j = np.ceil(neighborhood_size / 2)
+    max_middle_i = small_img.shape[0] - np.floor(neighborhood_size / 2)
+    max_middle_j = small_img.shape[1] - np.floor(neighborhood_size / 2)
+    for i, a in enumerate(small_img):
+        middle_i = i
+        middle_i = max(middle_i, min_middle_i)
+        middle_i = min(middle_i, max_middle_i)
+        for j, b in enumerate(a):
+            middle_j = j
+            middle_j = max(middle_j, min_middle_j)
+            middle_j = min(middle_j, max_middle_j)
+            big_img[i * neighborhood_size:(i + 1) * neighborhood_size,
+            j * neighborhood_size:(j + 1) * neighborhood_size] = \
+                small_img[
+                int(middle_i - np.ceil(neighborhood_size / 2)):int(middle_i + np.floor(neighborhood_size / 2)),
+                int(middle_j - np.ceil(neighborhood_size / 2)):int(middle_j + np.floor(neighborhood_size / 2))]
+    return big_img
+
+
+def contract(big_img, neighborhood_size):
+    small_shape = tuple(np.array(np.array(big_img.shape) / neighborhood_size, dtype=int))
+    small_img = np.empty(small_shape, dtype=float)
+    for i, a in enumerate(small_img):
+        for j, b in enumerate(a):
+            small_img[i, j] = big_img[i * neighborhood_size, j * neighborhood_size]
+    return small_img
