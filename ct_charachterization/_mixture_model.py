@@ -7,6 +7,12 @@ from scipy.special import digamma
 from functools import reduce
 
 
+def _get_alphas_solution(right_hand_side, previous_alpha):
+    alpha_optimizer = lambda alpha_var: right_hand_side - (np.log(alpha_var) - digamma(alpha_var))
+    alpha_solution = fsolve(alpha_optimizer, previous_alpha)
+    return alpha_solution
+
+
 def _compute_next_gamma(y, theta, big_jay):
     # Eq. 18
     shape_of_gamma = tuple(list(y.shape) + [big_jay])
@@ -48,10 +54,8 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
         right_hand_side = (first_numerator_summation - second_numerator_summation) / denominator_summation - 1
         # TODO: ravel and reshape work fine?
         alpha_initial_guess = previous_alpha[j, ...]
-        alpha_optimizer = lambda alpha_var: right_hand_side.reshape(right_hand_side.size) - (
-                np.log(alpha_var) - digamma(alpha_var))
-        alpha_solution = fsolve(alpha_optimizer, alpha_initial_guess.reshape(right_hand_side.size))
-        new_alpha[j, ...] = alpha_solution.reshape(y_shape_after_blocking)
+        vectorized_get_alphas_solution = np.vectorize(_get_alphas_solution)
+        new_alpha[j, ...] = vectorized_get_alphas_solution(right_hand_side, alpha_initial_guess)
         # constraint: alpha[j] * beta[j] = mu[j]
         new_beta[j, ...] = centered_mu[j] / new_alpha[j, ...]
         # Eq. 22

@@ -1,5 +1,6 @@
 from scipy.special import gamma
 import numpy as np
+import warnings
 
 from functools import reduce
 
@@ -46,10 +47,30 @@ def non_central_gamma_pdf(x, alpha, beta, delta):
     return central_gamma_pdf(y=y, alpha=alpha, beta=beta)
 
 
+def argmax_3d(img: np.array):
+    max1 = np.max(img, axis=0)
+    argmax1 = np.argmax(img, axis=0)
+    max2 = np.max(max1, axis=0)
+    argmax2 = np.argmax(max1, axis=0)
+    argmax3 = np.argmax(max2, axis=0)
+    argmax_3d = (argmax1[argmax2[argmax3], argmax3], argmax2[argmax3], argmax3)
+    return argmax_3d
+
+
+def argmax_2d(img: np.array):
+    max1 = np.max(img, axis=0)
+    argmax1 = np.argmax(img, axis=0)
+    argmax2 = np.argmax(max1, axis=0)
+    argmax_2d = (argmax1[argmax2], argmax2)
+    return argmax_2d
+
+
 def central_gamma_pdf(y, alpha, beta):
     assert (alpha > 0).all() and (
             beta > 0).all(), f'''Alpha and Beta must be more than zero. Alpha: {alpha}, Beta: {beta}'''
-    form = np.power(y, (alpha - 1)) * np.exp(-y / beta)
+    # big number turns to np.inf then, big * 0.0 should be 0.0, but it takes np.nan!
+    # so, we should change it with nan_to_num()
+    form = np.nan_to_num(np.power(y, (alpha - 1)) * np.exp(-y / beta))
     denominator = np.power(beta, alpha) * gamma(alpha)
     return form / denominator
 
