@@ -40,10 +40,15 @@ def run_third_algorithm_without_fixed_neighborhood(y: np.array, mu: np.array, ne
                                                    max_iter=10, tol=0.0000001, constant_c=10, non_central=False):
     big_y = expand(small_img=y, neighborhood_size=neighborhood_size)
     print('bigged')
+    plt.imshow(big_y, cmap='gray')
+    plt.show()
+    big_y = big_y[32 * 32:96 * 32, 32 * 32:96 * 32]
+    plt.imshow(big_y, cmap='gray')
+    plt.show()
     big_y_stab = run_third_algorithm(y=big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta,
                                      max_iter=max_iter, tol=tol, constant_c=constant_c, non_central=non_central)
     print('stable')
-    y_stab = np.empty(tuple(list(y.shape) + [len(mu)]), dtype=float)
+    y_stab = np.empty(tuple(list([64, 64]) + [len(mu)]), dtype=float)
     for j in range(len(mu)):
         y_stab[..., j] = contract(big_img=big_y_stab[..., j], neighborhood_size=neighborhood_size)
     print('smalled')
