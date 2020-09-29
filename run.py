@@ -1,5 +1,5 @@
 import numpy as np
-from ct_charachterization import run_first_algorithms, run_third_algorithm_without_fixed_neighborhood
+from ct_charachterization import run_first_algorithms, _run_third_algorithm_without_fixed_neighborhood
 import matplotlib.pyplot as plt
 
 # MU = np.array([-1000, -700, -90, 50, 300])
@@ -23,10 +23,10 @@ print(img.shape)
 img = img[0:128, 0:128]
 plt.imshow(img, cmap='gray')
 plt.show()
-plt.imshow(img[32:96, 32:96], cmap='gray')
+plt.imshow(img[16:112, 16:112], cmap='gray')
 plt.show()
-stabilized_y = run_third_algorithm_without_fixed_neighborhood(img, mu_5, non_central=True, constant_c=10,
-                                                              neighborhood_size=32)
+stabilized_y = _run_third_algorithm_without_fixed_neighborhood(img, mu_5, non_central=True, constant_c=10,
+                                                               neighborhood_size=32)
 sy = stabilized_y[..., 0]
 print(sy.shape)
 plt.imshow(sy, cmap='gray')

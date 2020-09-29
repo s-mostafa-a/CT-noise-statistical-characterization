@@ -65,7 +65,7 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
 
 
 def run_first_algorithms(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=5, tol=0.00000001,
-                         non_central=False):
+                         non_central=False, initial_alpha=None):
     y_shape_after_blocking = []
     for ax in y.shape:
         assert ax % neighborhood_size == 0, f'''Input array's shape ({ax}) is not dividable to neighborhood size ({neighborhood_size}).'''  # noqa
@@ -78,10 +78,15 @@ def run_first_algorithms(y: np.array, mu: np.array, neighborhood_size: int, delt
         mu = mu - delta
 
     # initial guess of parameters
+    if initial_alpha is None:
+        initial_alpha = [2] * big_jay
+    assert len(initial_alpha) == big_jay
+    initial_beta = [mu[j] / initial_alpha[j] for j in range(big_jay)]
+    initial_pi = [1 / big_jay] * big_jay
     # we assume that theta[0] = pi, theta[1] = alpha, theta[2] = beta
     shape_of_theta = tuple([3, big_jay] + y_shape_after_blocking)
     theta = np.empty(shape=shape_of_theta, dtype=float)
-    theta_before_expansion = np.array([[1 / big_jay] * big_jay, [2] * big_jay, [mu[j] / 2 for j in range(big_jay)]])
+    theta_before_expansion = np.array([initial_pi, initial_alpha, initial_beta])
     for _ in range(len(y_shape_after_blocking)):
         theta_before_expansion = np.expand_dims(theta_before_expansion, axis=-1)
     theta[...] = theta_before_expansion
