@@ -1,7 +1,6 @@
 import numpy as np
 
-from ct_charachterization.utility.utils import central_gamma_pdf, broadcast_tile, block_matrix, \
-    sum_over_each_neighborhood_on_blocked_matrix
+from .utility.utils import central_gamma_pdf, broadcast_tile, block_matrix, sum_over_each_neighborhood_on_blocked_matrix
 from scipy.optimize import fsolve
 from scipy.special import digamma
 from functools import reduce
@@ -64,12 +63,15 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
     return new_theta
 
 
-def run_first_algorithms(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=5, tol=0.00000001,
-                         non_central=False, initial_alpha=None):
+def run_first_algorithm(y: np.array, mu: np.array, neighborhood_size=0, delta=-1030, max_iter=5, tol=0.00000001,
+                        non_central=False, initial_alpha=None):
     y_shape_after_blocking = []
-    for ax in y.shape:
-        assert ax % neighborhood_size == 0, f'''Input array's shape ({ax}) is not dividable to neighborhood size ({neighborhood_size}).'''  # noqa
-        y_shape_after_blocking.append(ax // neighborhood_size)
+    if neighborhood_size > 0:
+        for ax in y.shape:
+            assert ax % neighborhood_size == 0, f'''Input array's shape ({y.shape}) is not dividable to neighborhood size ({neighborhood_size}).'''  # noqa
+            y_shape_after_blocking.append(ax // neighborhood_size)
+    else:
+        y_shape_after_blocking = [1 for _ in range(len(y.shape))]
     big_jay = len(mu)
 
     # centering the data

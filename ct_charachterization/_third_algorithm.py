@@ -1,8 +1,8 @@
 import numpy as np
-from ct_charachterization import run_first_algorithms
 import matplotlib.pyplot as plt
-from ct_charachterization.utility.utils import broadcast_tile, block_matrix, \
-    sum_over_each_neighborhood_on_blocked_matrix, expand, contract
+from .utility.utils import broadcast_tile, block_matrix, expand, contract, \
+    sum_over_each_neighborhood_on_blocked_matrix
+from ._second_algorithm import run_second_algorithm
 
 
 def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=10, tol=0.0000001,
@@ -11,7 +11,7 @@ def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta
     if non_central:
         mu = mu - delta
         y = y - delta
-    theta, gamma = run_first_algorithms(y, mu=mu, neighborhood_size=neighborhood_size, delta=delta, max_iter=max_iter,
+    theta, gamma = run_second_algorithm(y, mu=mu, neighborhood_size=neighborhood_size, delta=delta, max_iter=max_iter,
                                         tol=tol)
     shape_of_each_neighborhood = tuple([neighborhood_size for _ in y.shape])
     blocked_y = block_matrix(mat=y, neighborhood_shape=shape_of_each_neighborhood)
@@ -54,23 +54,22 @@ def _run_third_algorithm_without_fixed_neighborhood(y: np.array, mu: np.array, n
     print('smalled')
     return y_stab
 
-
-if __name__ == '__main__':
-    # mu_5 = np.array([-1000, -700, -90, 50, 300])
-    mu_5 = np.array([-870])
-    # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
-    img = np.load(f'''../resources/luna_cropped.npy''')
-    print(img.shape)
-    img = img[0:140, 0:140]
-    plt.imshow(img, cmap='gray')
-    plt.show()
-    stabilized_y = _run_third_algorithm_without_fixed_neighborhood(img, mu_5, non_central=True, constant_c=10,
-                                                                   neighborhood_size=70)
-    plt.imshow(img, cmap='gray')
-    plt.show()
-    print(img.shape)
-    sy = stabilized_y[..., 0]
-    print(sy.shape)
-    plt.imshow(sy, cmap='gray')
-    plt.show()
-    print(np.min(sy) - 1030, np.mean(sy) - 1030, np.max(sy) - 1030)
+# if __name__ == '__main__':
+#     # mu_5 = np.array([-1000, -700, -90, 50, 300])
+#     mu_5 = np.array([-870])
+#     # MU = np.array([340, 240, 100, 0, -160, -370, -540, -810, -987])
+#     img = np.load(f'''../resources/luna_cropped.npy''')
+#     print(img.shape)
+#     img = img[0:140, 0:140]
+#     plt.imshow(img, cmap='gray')
+#     plt.show()
+#     stabilized_y = _run_third_algorithm_without_fixed_neighborhood(img, mu_5, non_central=True, constant_c=10,
+#                                                                    neighborhood_size=70)
+#     plt.imshow(img, cmap='gray')
+#     plt.show()
+#     print(img.shape)
+#     sy = stabilized_y[..., 0]
+#     print(sy.shape)
+#     plt.imshow(sy, cmap='gray')
+#     plt.show()
+#     print(np.min(sy) - 1030, np.mean(sy) - 1030, np.max(sy) - 1030)
