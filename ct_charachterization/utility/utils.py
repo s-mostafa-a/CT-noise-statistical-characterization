@@ -118,9 +118,10 @@ def expand(small_img, neighborhood_size):
 
 
 def contract(big_img, neighborhood_size):
+    half_neigh = int(np.ceil(neighborhood_size / 2))
     small_shape = tuple(np.array(np.array(big_img.shape) / neighborhood_size, dtype=int))
     small_img = np.empty(small_shape, dtype=float)
     for i, a in enumerate(small_img):
         for j, b in enumerate(a):
-            small_img[i, j] = big_img[i * neighborhood_size, j * neighborhood_size]
+            small_img[i, j] = big_img[i * neighborhood_size + half_neigh, j * neighborhood_size + half_neigh]
     return small_img
