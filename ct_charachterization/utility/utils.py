@@ -1,6 +1,5 @@
 from scipy.special import gamma
 import numpy as np
-import warnings
 
 from functools import reduce
 
