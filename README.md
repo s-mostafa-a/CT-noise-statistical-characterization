@@ -5,10 +5,10 @@ Currently, I am debugging the 3rd algorithm. If you are interested to see the la
 
 The original image:
 
-![original img](resources/figs/small.png) 
+![original img](resources/figs/partial.png) 
 
 The stabilized image:
 
-![stabilized img](resources/figs/small_stabilized.png) 
+![stabilized img](resources/figs/partial_stabilized.png) 
 
 # WORK IN PROGRESS ...
