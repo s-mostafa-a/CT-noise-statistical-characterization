@@ -37,8 +37,8 @@ def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta
                                                shape_of_each_neighborhood)
         first_local_sample_conditioned_moment[..., j] = first_numerator_summation / denominator_summation
         second_local_sample_conditioned_moment[..., j] = second_numerator_summation / denominator_summation
-    first_local_sample_conditioned_moment = np.sum(first_local_sample_conditioned_moment * pi, axis=-1)
-    second_local_sample_conditioned_moment = np.sum(second_local_sample_conditioned_moment * pi, axis=-1)
+    first_local_sample_conditioned_moment = np.sum(first_local_sample_conditioned_moment * gamma, axis=-1)
+    second_local_sample_conditioned_moment = np.sum(second_local_sample_conditioned_moment * gamma, axis=-1)
     local_sample_variance = second_local_sample_conditioned_moment - np.power(first_local_sample_conditioned_moment, 2)
     y_stab = (constant_c * (np.sqrt(y) - first_local_sample_conditioned_moment) / np.sqrt(
         local_sample_variance)) + second_local_sample_conditioned_moment
