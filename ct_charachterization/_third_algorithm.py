@@ -11,15 +11,6 @@ def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta
         y = y - delta
     theta, gamma = run_second_algorithm(y, mu=mu, neighborhood_size=neighborhood_size, delta=delta, max_iter=max_iter,
                                         tol=tol)
-    pi = theta[0, ...]
-    axes = list(range(len(pi.shape)))
-    axes.pop(0)
-    axes.append(0)
-    pi = np.transpose(pi, axes=axes)
-    # print('pi:', pi.shape)
-    times_pi_to_be_broad_casted = np.array(np.array(y.shape) / np.array(pi.shape[:-1]), dtype=int)
-    pi = broadcast_tile(pi, tuple(list(times_pi_to_be_broad_casted) + [1]))
-    # print('pi:', pi.shape)
     shape_of_each_neighborhood = tuple([neighborhood_size for _ in y.shape])
     blocked_y = block_matrix(mat=y, neighborhood_shape=shape_of_each_neighborhood)
     blocked_radical_y = block_matrix(mat=np.sqrt(y), neighborhood_shape=shape_of_each_neighborhood)
