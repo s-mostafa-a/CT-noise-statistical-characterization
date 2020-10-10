@@ -63,7 +63,7 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
     return new_theta
 
 
-def run_first_algorithm(y: np.array, mu: np.array, neighborhood_size=0, delta=-1030, max_iter=5, tol=0.00000001,
+def run_first_algorithm(y: np.array, mu: np.array, neighborhood_size=0, delta=-1030, max_iter=5, tol=0.01,
                         non_central=False, initial_alpha=None):
     y_shape_after_blocking = []
     if neighborhood_size > 0:

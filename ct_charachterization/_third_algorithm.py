@@ -3,7 +3,7 @@ from .utility.utils import broadcast_tile, block_matrix, sum_over_each_neighborh
 from ._second_algorithm import run_second_algorithm
 
 
-def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=10, tol=0.0000001,
+def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=10, tol=0.01,
                         constant_c=10, non_central=False):
     big_jay = len(mu)
     if non_central:
@@ -19,15 +19,17 @@ def run_third_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta
     second_local_sample_conditioned_moment = np.empty(moments_size, dtype=float)
     for j in range(big_jay):
         blocked_gamma_j = block_matrix(mat=gamma[..., j], neighborhood_shape=shape_of_each_neighborhood)
-        first_numerator_summation = broadcast_tile(
-            sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_radical_y),
-            shape_of_each_neighborhood)
-        second_numerator_summation = broadcast_tile(
-            sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_y), shape_of_each_neighborhood)
-        denominator_summation = broadcast_tile(sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j),
-                                               shape_of_each_neighborhood)
-        first_local_sample_conditioned_moment[..., j] = first_numerator_summation / denominator_summation
-        second_local_sample_conditioned_moment[..., j] = second_numerator_summation / denominator_summation
+        first_numerator_summation = np.nan_to_num(
+            broadcast_tile(sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_radical_y),
+                           shape_of_each_neighborhood))
+        second_numerator_summation = np.nan_to_num(
+            broadcast_tile(sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_y),
+                           shape_of_each_neighborhood))
+        denominator_summation = np.nan_to_num(
+            broadcast_tile(sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j), shape_of_each_neighborhood))
+        first_local_sample_conditioned_moment[..., j] = np.nan_to_num(first_numerator_summation / denominator_summation)
+        second_local_sample_conditioned_moment[..., j] = np.nan_to_num(
+            second_numerator_summation / denominator_summation)
     first_local_sample_conditioned_moment = np.sum(first_local_sample_conditioned_moment * gamma, axis=-1)
     second_local_sample_conditioned_moment = np.sum(second_local_sample_conditioned_moment * gamma, axis=-1)
     local_sample_variance = second_local_sample_conditioned_moment - np.power(first_local_sample_conditioned_moment, 2)

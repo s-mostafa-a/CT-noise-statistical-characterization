@@ -70,8 +70,8 @@ def central_gamma_pdf(y, alpha, beta):
     # big number turns to np.inf then, big * 0.0 should be 0.0, but it takes np.nan!
     # so, we should change it with nan_to_num()
     form = np.nan_to_num(np.power(y, (alpha - 1)) * np.exp(-y / beta))
-    denominator = np.power(beta, alpha) * gamma(alpha)
-    return form / denominator
+    denominator = np.nan_to_num(np.power(beta, alpha) * gamma(alpha))
+    return np.nan_to_num(form / denominator)
 
 
 def broadcast_tile(matrix, times: tuple):
