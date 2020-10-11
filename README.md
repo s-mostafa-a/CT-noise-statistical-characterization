@@ -13,14 +13,14 @@ The stabilized image:
 
 ![stabilized img](resources/figs/stabilized.png) 
 
-### previous results
+### bigger image
 
 The original image:
 
-![original img](resources/figs/partial.png) 
+![original img](resources/figs/img.png) 
 
 The stabilized image:
 
-![stabilized img](resources/figs/partial_stabilized.png) 
+![stabilized img](resources/figs/stabilized_img.png) 
 
 # WORK IN PROGRESS ...
