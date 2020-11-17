@@ -1,5 +1,5 @@
 import numpy as np
-from ct_charachterization import run_first_algorithm, run_second_algorithm, run_third_algorithm
+from ct_charachterization import run_first_algorithm, run_second_algorithm, run_third_algorithm_gamma_instead_of_pi
 import matplotlib.pyplot as plt
 
 
@@ -28,7 +28,7 @@ def test_third():
     img = img[0:128, 0:128]
     plt.imshow(img, cmap='gray')
     plt.show()
-    stabilized_y = run_third_algorithm(img, mu, non_central=True, constant_c=10, neighborhood_size=32)
+    stabilized_y = run_third_algorithm_gamma_instead_of_pi(img, mu, non_central=True, constant_c=10, neighborhood_size=32)
     sy = stabilized_y
     print(sy.shape)
     plt.imshow(sy, cmap='gray')

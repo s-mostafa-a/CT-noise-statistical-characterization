@@ -26,7 +26,7 @@ def _compute_next_gamma(y, theta, big_jay):
         beta = broadcast_tile(beta, times_to_br)
         new_gamma[..., j] = pi * central_gamma_pdf(y, alpha=alpha, beta=beta)
     summation = np.expand_dims(np.sum(new_gamma, axis=-1), axis=-1)
-    new_gamma = new_gamma / summation
+    new_gamma = np.nan_to_num(new_gamma / summation)
     return new_gamma
 
 
