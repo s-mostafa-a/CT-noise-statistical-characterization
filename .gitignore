@@ -5,3 +5,4 @@ __pycache__/
 /notebooks/.ipynb_checkpoints
 resources/dicoms/
 resources/sample/
+/ct_charachterization/run_tests/*

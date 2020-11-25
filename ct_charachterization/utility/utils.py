@@ -1,4 +1,4 @@
-from scipy.special import gamma
+from scipy.special import gamma, loggamma
 import numpy as np
 
 from functools import reduce
@@ -62,6 +62,17 @@ def argmax_2d(img: np.array):
     argmax2 = np.argmax(max1, axis=0)
     argmax_2d = (argmax1[argmax2], argmax2)
     return argmax_2d
+
+
+def central_gamma_log_pdf(y, alpha, beta):
+    assert (alpha > 0).all() and (
+            beta > 0).all(), f'''Alpha and Beta must be more than zero. Alpha: {alpha}, Beta: {beta}'''
+    assert (y > 0).all(), f'''y value Must be more than zero. y: {y}'''
+    a = (alpha - 1) * np.log(y)
+    b = (y / beta)
+    c = alpha * np.log(beta)
+    d = loggamma(alpha)
+    return a - b - c - d
 
 
 def central_gamma_pdf(y, alpha, beta):
