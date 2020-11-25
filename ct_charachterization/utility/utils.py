@@ -34,7 +34,7 @@ def sum_over_each_neighborhood_on_blocked_matrix(mat: np.array):
     size = mat.size
     range_of_size = np.array(list(range(size)))
     all_multi_dimensional_indices = _get_hashed_number(range_of_size, mat.shape)
-    res = np.empty(mat.shape, dtype=mat[tuple(all_multi_dimensional_indices[0])].dtype)
+    res = np.empty(mat.shape, dtype=np.longdouble)
     for multi_dimensional_index in all_multi_dimensional_indices:
         res[tuple(multi_dimensional_index)] = np.sum(mat[tuple(multi_dimensional_index)])
     return res
@@ -52,16 +52,34 @@ def argmax_3d(img: np.array):
     max2 = np.max(max1, axis=0)
     argmax2 = np.argmax(max1, axis=0)
     argmax3 = np.argmax(max2, axis=0)
-    argmax_3d = (argmax1[argmax2[argmax3], argmax3], argmax2[argmax3], argmax3)
-    return argmax_3d
+    argmax3d = (argmax1[argmax2[argmax3], argmax3], argmax2[argmax3], argmax3)
+    return argmax3d
+
+
+def argmin_3d(img: np.array):
+    min1 = np.min(img, axis=0)
+    argmin1 = np.argmin(img, axis=0)
+    min2 = np.max(min1, axis=0)
+    argmin2 = np.argmin(min1, axis=0)
+    argmin3 = np.argmin(min2, axis=0)
+    argmin3d = (argmin1[argmin2[argmin3], argmin3], argmin2[argmin3], argmin3)
+    return argmin3d
 
 
 def argmax_2d(img: np.array):
     max1 = np.max(img, axis=0)
     argmax1 = np.argmax(img, axis=0)
     argmax2 = np.argmax(max1, axis=0)
-    argmax_2d = (argmax1[argmax2], argmax2)
-    return argmax_2d
+    argmax2d = (argmax1[argmax2], argmax2)
+    return argmax2d
+
+
+def argmin_2d(img: np.array):
+    min1 = np.min(img, axis=0)
+    argmin1 = np.argmin(img, axis=0)
+    argmin2 = np.argmax(min1, axis=0)
+    argmin2d = (argmin1[argmin2], argmin2)
+    return argmin2d
 
 
 def central_gamma_log_pdf(y, alpha, beta):

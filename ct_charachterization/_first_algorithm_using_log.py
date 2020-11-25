@@ -27,6 +27,7 @@ def _compute_next_gamma(y, theta, big_jay):
         beta = broadcast_tile(beta, times_to_br)
         gamma_numerators[..., j] = np.log(pi) + central_gamma_log_pdf(y, alpha=alpha, beta=beta)
     new_gamma = np.exp(gamma_numerators - logsumexp(gamma_numerators, axis=-1)[..., np.newaxis])
+    print(np.min(new_gamma), np.max(new_gamma))
     return new_gamma
 
 
@@ -50,7 +51,8 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
             blocked_gamma_j * (blocked_log_y - np.log(centered_mu[j])))
         denominator_summation = sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j)
         # Eq. 24
-        right_hand_side = (first_numerator_summation - second_numerator_summation) / denominator_summation - 1
+        right_hand_side = np.nan_to_num(
+            (first_numerator_summation - second_numerator_summation) / denominator_summation) - 1
         # TODO: ravel and reshape work fine?
         alpha_initial_guess = previous_alpha[j, ...]
         vectorized_get_alphas_solution = np.vectorize(_get_alphas_solution)

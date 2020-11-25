@@ -1,10 +1,13 @@
 import numpy as np
-from .utility.utils import broadcast_tile, block_matrix, sum_over_each_neighborhood_on_blocked_matrix
+from .utility.utils import broadcast_tile, block_matrix, sum_over_each_neighborhood_on_blocked_matrix, argmin_2d, \
+    argmax_3d, argmax_2d
 from ._second_algorithm import run_second_algorithm
 from ct_charachterization.utility.utils import expand, contract
+from matplotlib import pyplot as plt
 
 
-def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=10, tol=0.01,
+def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=10,
+                                            tol=0.01,
                                             constant_c=10, non_central=False):
     big_jay = len(mu)
     if non_central:
@@ -17,7 +20,8 @@ def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborh
     big_y = expand(small_img=y, neighborhood_size=neighborhood_size)
     big_y = big_y[half_neigh * neighborhood_size:(first_shape - half_neigh) * neighborhood_size,
             half_neigh * neighborhood_size:(second_shape - half_neigh) * neighborhood_size]
-    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta, max_iter=max_iter,
+    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta,
+                                        max_iter=max_iter,
                                         tol=tol)
     shape_of_each_neighborhood = tuple([neighborhood_size for _ in big_y.shape])
     blocked_y = block_matrix(mat=big_y, neighborhood_shape=shape_of_each_neighborhood)
@@ -46,7 +50,8 @@ def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborh
     return contract(big_img=y_stab, neighborhood_size=neighborhood_size)
 
 
-def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030, max_iter=10, tol=0.01,
+def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030,
+                                               max_iter=10, tol=0.01,
                                                constant_c=2, non_central=False):
     if non_central:
         mu = mu - delta
@@ -72,15 +77,18 @@ def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighb
     y_stab = np.empty(moments_size, dtype=float)
     for j in range(big_jay):
         blocked_gamma_j = block_matrix(mat=gamma[..., j], neighborhood_shape=shape_of_each_neighborhood)
-        first_numerator_summation = np.nan_to_num(
-            sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_radical_y))
-        second_numerator_summation = np.nan_to_num(
-            sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_y))
+        first_numerator_summation = sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_radical_y)
+        second_numerator_summation = sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j * blocked_y)
         denominator_summation = sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j)
+        # This does not affect the results. Just to remove warnings.
+        denominator_summation[denominator_summation == 0] = 1
         first_local_sample_conditioned_moment[j, ...] = first_numerator_summation / denominator_summation
         second_local_sample_conditioned_moment[j, ...] = second_numerator_summation / denominator_summation
-        variances[j, ...] = second_local_sample_conditioned_moment[j, ...] - np.power(
-            first_local_sample_conditioned_moment[j, ...], 2)
+        vr = (second_local_sample_conditioned_moment[j, ...] - np.power(
+            first_local_sample_conditioned_moment[j, ...], 2))
+        # Safety
+        vr[vr <= 0] = 1
+        variances[j, ...] = vr
         y_stab[j, ...] = (constant_c * (np.sqrt(y[half_neigh:first_shape - half_neigh,
                                                 half_neigh: second_shape - half_neigh]) -
                                         first_local_sample_conditioned_moment[j, ...]) / np.sqrt(
@@ -89,7 +97,8 @@ def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighb
     return y_stab
 
 
-def run_third_algorithm_expectation_at_the_beginning(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030, max_iter=10, tol=0.01,
+def run_third_algorithm_expectation_at_the_beginning(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030,
+                                                     max_iter=10, tol=0.01,
                                                      constant_c=2, non_central=False):
     if non_central:
         mu = mu - delta
