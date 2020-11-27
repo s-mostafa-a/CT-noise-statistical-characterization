@@ -27,7 +27,6 @@ def _compute_next_gamma(y, theta, big_jay):
         beta = broadcast_tile(beta, times_to_br)
         gamma_numerators[..., j] = np.log(pi) + central_gamma_log_pdf(y, alpha=alpha, beta=beta)
     new_gamma = np.exp(gamma_numerators - logsumexp(gamma_numerators, axis=-1)[..., np.newaxis])
-    print(np.min(new_gamma), np.max(new_gamma))
     return new_gamma
 
 
