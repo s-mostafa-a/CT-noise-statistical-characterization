@@ -88,9 +88,6 @@ def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighb
         # TODO This is safety, show it on the presentation
         vr[vr <= 0] = constant_c ** 2
         vr[vr ** 2 <= 0.5] = constant_c ** 2
-        print(f'j = {j}:', vr[49, 55])
-        print(f'j = {j}:', vr[39, 16])
-        print()
         variances[j, ...] = vr
         y_stab[j, ...] = (constant_c * (np.sqrt(y[half_neigh:first_shape - half_neigh,
                                                 half_neigh: second_shape - half_neigh]) -
