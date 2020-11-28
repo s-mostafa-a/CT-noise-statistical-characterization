@@ -15,13 +15,13 @@ def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborh
     first_shape = y.shape[0]
     second_shape = y.shape[1]
     half_neigh = int(neighborhood_size / 2)
-    big_y = expand(small_img=y, neighborhood_size=neighborhood_size)
-    big_y = big_y[half_neigh * neighborhood_size:(first_shape - half_neigh) * neighborhood_size,
-            half_neigh * neighborhood_size:(second_shape - half_neigh) * neighborhood_size]
-    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta,
-                                        max_iter=max_iter,
-                                        tol=tol)
-    shape_of_each_neighborhood = tuple([neighborhood_size for _ in big_y.shape])
+    neigh_size_including_center = half_neigh * 2 + 1
+    big_y = expand(small_img=y, neighborhood_size=neigh_size_including_center)
+    big_y = big_y[half_neigh * neigh_size_including_center:(first_shape - half_neigh) * neigh_size_including_center,
+            half_neigh * neigh_size_including_center:(second_shape - half_neigh) * neigh_size_including_center]
+    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neigh_size_including_center, delta=delta,
+                                        max_iter=max_iter, tol=tol)
+    shape_of_each_neighborhood = tuple([neigh_size_including_center for _ in big_y.shape])
     blocked_y = block_matrix(mat=big_y, neighborhood_shape=shape_of_each_neighborhood)
     blocked_radical_y = block_matrix(mat=np.sqrt(big_y), neighborhood_shape=shape_of_each_neighborhood)
     moments_size = tuple(list(big_y.shape) + [big_jay])
@@ -46,7 +46,7 @@ def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborh
     local_sample_variance = second_local_sample_conditioned_moment - np.power(first_local_sample_conditioned_moment, 2)
     y_stab = (constant_c * (np.sqrt(big_y) - first_local_sample_conditioned_moment) / np.sqrt(
         local_sample_variance)) + second_local_sample_conditioned_moment
-    return contract(big_img=y_stab, neighborhood_size=neighborhood_size)
+    return contract(big_img=y_stab, neighborhood_size=neigh_size_including_center)
 
 
 def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030,
@@ -57,19 +57,20 @@ def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighb
         y = y - delta
     first_shape = y.shape[0]
     second_shape = y.shape[1]
-    big_y = expand(small_img=y, neighborhood_size=neighborhood_size)
     half_neigh = int(neighborhood_size / 2)
-    big_y = big_y[half_neigh * neighborhood_size:(first_shape - half_neigh) * neighborhood_size,
-            half_neigh * neighborhood_size:(second_shape - half_neigh) * neighborhood_size]
+    neigh_size_including_center = half_neigh * 2 + 1
+    big_y = expand(small_img=y, neighborhood_size=neigh_size_including_center)
+    big_y = big_y[half_neigh * neigh_size_including_center:(first_shape - half_neigh) * neigh_size_including_center,
+            half_neigh * neigh_size_including_center:(second_shape - half_neigh) * neigh_size_including_center]
     big_jay = len(mu)
-    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta,
+    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neigh_size_including_center, delta=delta,
                                         max_iter=max_iter,
                                         tol=tol)
     pi = theta[0, ...]
-    shape_of_each_neighborhood = tuple([neighborhood_size for _ in big_y.shape])
+    shape_of_each_neighborhood = tuple([neigh_size_including_center for _ in big_y.shape])
     blocked_y = block_matrix(mat=big_y, neighborhood_shape=shape_of_each_neighborhood)
     blocked_radical_y = block_matrix(mat=np.sqrt(big_y), neighborhood_shape=shape_of_each_neighborhood)
-    moments_size = tuple([big_jay] + [int(i / neighborhood_size) for i in big_y.shape])
+    moments_size = tuple([big_jay] + [int(i / neigh_size_including_center) for i in big_y.shape])
     first_local_sample_conditioned_moment = np.empty(moments_size, dtype=float)
     second_local_sample_conditioned_moment = np.empty(moments_size, dtype=float)
     variances = np.empty(moments_size, dtype=float)
@@ -105,19 +106,20 @@ def run_third_algorithm_expectation_at_the_beginning(y: np.array, mu: np.array, 
         y = y - delta
     first_shape = y.shape[0]
     second_shape = y.shape[1]
-    big_y = expand(small_img=y, neighborhood_size=neighborhood_size)
     half_neigh = int(neighborhood_size / 2)
-    big_y = big_y[half_neigh * neighborhood_size:(first_shape - half_neigh) * neighborhood_size,
-            half_neigh * neighborhood_size:(second_shape - half_neigh) * neighborhood_size]
+    neigh_size_including_center = half_neigh * 2 + 1
+    big_y = expand(small_img=y, neighborhood_size=neigh_size_including_center)
+    big_y = big_y[half_neigh * neigh_size_including_center:(first_shape - half_neigh) * neigh_size_including_center,
+            half_neigh * neigh_size_including_center:(second_shape - half_neigh) * neigh_size_including_center]
     big_jay = len(mu)
-    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta,
+    theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neigh_size_including_center, delta=delta,
                                         max_iter=max_iter,
                                         tol=tol)
     pi = theta[0, ...]
-    shape_of_each_neighborhood = tuple([neighborhood_size for _ in big_y.shape])
+    shape_of_each_neighborhood = tuple([neigh_size_including_center for _ in big_y.shape])
     blocked_y = block_matrix(mat=big_y, neighborhood_shape=shape_of_each_neighborhood)
     blocked_radical_y = block_matrix(mat=np.sqrt(big_y), neighborhood_shape=shape_of_each_neighborhood)
-    moments_size = tuple([big_jay] + [int(i / neighborhood_size) for i in big_y.shape])
+    moments_size = tuple([big_jay] + [int(i / neigh_size_including_center) for i in big_y.shape])
     first_local_sample_conditioned_moment = np.empty(moments_size, dtype=float)
     second_local_sample_conditioned_moment = np.empty(moments_size, dtype=float)
     for j in range(big_jay):
