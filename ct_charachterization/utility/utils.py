@@ -119,37 +119,42 @@ def broadcast_tile(matrix, times: tuple):
     return np.broadcast_to(matrix.reshape(reshape_to), final_shape).reshape(lsd)
 
 
-def expand(small_img, neighborhood_size):
-    assert len(small_img.shape) == 2, f'input image must have 2 axes, number of axes: {len(small_img.shape)}'
+def expand(small_img, half_neigh_size: int):
     for s in small_img.shape:
-        assert neighborhood_size < s, f'neighborhood must be less than image shape, neighbor: {neighborhood_size}, shape: {small_img.shape}'  # noqa
-    big_shape = tuple(np.array(small_img.shape) * neighborhood_size)
-    big_img = np.empty(big_shape, dtype=float)
-    min_middle_i = np.ceil(neighborhood_size / 2)
-    min_middle_j = np.ceil(neighborhood_size / 2)
-    max_middle_i = small_img.shape[0] - np.floor(neighborhood_size / 2)
-    max_middle_j = small_img.shape[1] - np.floor(neighborhood_size / 2)
-    for i, a in enumerate(small_img):
-        middle_i = i
-        middle_i = max(middle_i, min_middle_i)
-        middle_i = min(middle_i, max_middle_i)
-        for j, b in enumerate(a):
-            middle_j = j
-            middle_j = max(middle_j, min_middle_j)
-            middle_j = min(middle_j, max_middle_j)
-            big_img[i * neighborhood_size:(i + 1) * neighborhood_size,
-            j * neighborhood_size:(j + 1) * neighborhood_size] = \
-                small_img[
-                int(middle_i - np.ceil(neighborhood_size / 2)):int(middle_i + np.floor(neighborhood_size / 2)),
-                int(middle_j - np.ceil(neighborhood_size / 2)):int(middle_j + np.floor(neighborhood_size / 2))]
+        assert half_neigh_size * 2 + 1 <= s, f'neighborhood_size: {half_neigh_size * 2 + 1}, shape: {small_img.shape}'
+    padding = np.array([half_neigh_size for _ in small_img.shape])
+    big_shape = tuple((np.array(small_img.shape) - padding * 2) * (half_neigh_size * 2 + 1))
+    big_img = np.zeros(big_shape, dtype=float)
+    size = reduce(lambda x, y: x * y, small_img.shape)
+    range_of_size = np.array(list(range(size)))
+    all_multi_dimensional_indices = _get_hashed_number(range_of_size, small_img.shape)
+    for center_of_small in all_multi_dimensional_indices:
+        center_of_big = (center_of_small - half_neigh_size) * (half_neigh_size * 2 + 1) + half_neigh_size
+        small_lower = center_of_small - padding
+        small_upper = center_of_small + padding + 1
+        big_lower = center_of_big - padding
+        big_upper = center_of_big + padding + 1
+        if (small_lower < 0).any() or (small_upper > np.array(small_img.shape)).any():
+            continue
+        if (big_lower < 0).any() or (big_upper > np.array(big_img.shape)).any():
+            continue
+        small_slices = []
+        big_slices = []
+        for i in range(len(small_lower)):
+            small_slices.append(slice(small_lower[i], small_upper[i], 1))
+            big_slices.append(slice(big_lower[i], big_upper[i], 1))
+        big_img[big_slices] = small_img[small_slices]
     return big_img
 
 
-def contract(big_img, neighborhood_size):
-    half_neigh = int(np.ceil(neighborhood_size / 2))
+def contract(big_img, half_neigh_size):
+    neighborhood_size = half_neigh_size * 2 + 1
     small_shape = tuple(np.array(np.array(big_img.shape) / neighborhood_size, dtype=int))
     small_img = np.empty(small_shape, dtype=float)
-    for i, a in enumerate(small_img):
-        for j, b in enumerate(a):
-            small_img[i, j] = big_img[i * neighborhood_size + half_neigh, j * neighborhood_size + half_neigh]
+    size = reduce(lambda x, y: x * y, small_img.shape)
+    range_of_size = np.array(list(range(size)))
+    all_multi_dimensional_indices = _get_hashed_number(range_of_size, small_img.shape)
+    for center_of_small in all_multi_dimensional_indices:
+        center_of_big = center_of_small * (half_neigh_size * 2 + 1) + half_neigh_size
+        small_img[tuple(center_of_small)] = big_img[tuple(center_of_big)]
     return small_img

@@ -1,24 +1,18 @@
 import numpy as np
-from .utility.utils import broadcast_tile, block_matrix, sum_over_each_neighborhood_on_blocked_matrix
+from .utility.utils import broadcast_tile, block_matrix, sum_over_each_neighborhood_on_blocked_matrix, expand
 from ._second_algorithm import run_second_algorithm
 from ct_charachterization.utility.utils import expand, contract
 
 
-def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=10,
-                                            tol=0.01,
-                                            constant_c=10, non_central=False):
-    big_jay = len(mu)
+def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborhood_size=7, delta=-1030, max_iter=10,
+                                            tol=0.01, constant_c=10, non_central=False):
     if non_central:
         mu = mu - delta
         y = y - delta
-
-    first_shape = y.shape[0]
-    second_shape = y.shape[1]
     half_neigh = int(neighborhood_size / 2)
     neigh_size_including_center = half_neigh * 2 + 1
-    big_y = expand(small_img=y, neighborhood_size=neigh_size_including_center)
-    big_y = big_y[half_neigh * neigh_size_including_center:(first_shape - half_neigh) * neigh_size_including_center,
-            half_neigh * neigh_size_including_center:(second_shape - half_neigh) * neigh_size_including_center]
+    big_y = expand(small_img=y, half_neigh_size=half_neigh)
+    big_jay = len(mu)
     theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neigh_size_including_center, delta=delta,
                                         max_iter=max_iter, tol=tol)
     shape_of_each_neighborhood = tuple([neigh_size_including_center for _ in big_y.shape])
@@ -46,22 +40,23 @@ def run_third_algorithm_gamma_instead_of_pi(y: np.array, mu: np.array, neighborh
     local_sample_variance = second_local_sample_conditioned_moment - np.power(first_local_sample_conditioned_moment, 2)
     y_stab = (constant_c * (np.sqrt(big_y) - first_local_sample_conditioned_moment) / np.sqrt(
         local_sample_variance)) + second_local_sample_conditioned_moment
-    return contract(big_img=y_stab, neighborhood_size=neigh_size_including_center)
+    return contract(big_img=y_stab, half_neigh_size=half_neigh)
 
 
-def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030,
+def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighborhood_size=7, delta=-1030,
                                                max_iter=10, tol=0.01,
                                                constant_c=2, non_central=False):
     if non_central:
         mu = mu - delta
         y = y - delta
-    first_shape = y.shape[0]
-    second_shape = y.shape[1]
     half_neigh = int(neighborhood_size / 2)
+    y_lower = np.array([half_neigh for _ in range(len(y.shape))])
+    y_upper = np.array(y.shape) - y_lower
+    y_slices = []
+    for i in range(len(y_lower)):
+        y_slices.append(slice(y_lower[i], y_upper[i], 1))
     neigh_size_including_center = half_neigh * 2 + 1
-    big_y = expand(small_img=y, neighborhood_size=neigh_size_including_center)
-    big_y = big_y[half_neigh * neigh_size_including_center:(first_shape - half_neigh) * neigh_size_including_center,
-            half_neigh * neigh_size_including_center:(second_shape - half_neigh) * neigh_size_including_center]
+    big_y = expand(small_img=y, half_neigh_size=half_neigh)
     big_jay = len(mu)
     theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neigh_size_including_center, delta=delta,
                                         max_iter=max_iter,
@@ -90,27 +85,26 @@ def run_third_algorithm_expectation_at_the_end(y: np.array, mu: np.array, neighb
         vr[vr <= 0] = constant_c ** 2
         vr[vr ** 2 <= 0.5] = constant_c ** 2
         variances[j, ...] = vr
-        y_stab[j, ...] = (constant_c * (np.sqrt(y[half_neigh:first_shape - half_neigh,
-                                                half_neigh: second_shape - half_neigh]) -
+        y_stab[j, ...] = (constant_c * (np.sqrt(y[y_slices]) -
                                         first_local_sample_conditioned_moment[j, ...]) / np.sqrt(
             variances[j, ...])) + second_local_sample_conditioned_moment[j, ...]
     y_stab = np.sum(y_stab * pi, axis=0)
     return y_stab
 
 
-def run_third_algorithm_expectation_at_the_beginning(y: np.array, mu: np.array, neighborhood_size=32, delta=-1030,
-                                                     max_iter=10, tol=0.01,
-                                                     constant_c=2, non_central=False):
+def run_third_algorithm_expectation_at_the_beginning(y: np.array, mu: np.array, neighborhood_size=7, delta=-1030,
+                                                     max_iter=10, tol=0.01, constant_c=2, non_central=False):
     if non_central:
         mu = mu - delta
         y = y - delta
-    first_shape = y.shape[0]
-    second_shape = y.shape[1]
     half_neigh = int(neighborhood_size / 2)
+    y_lower = np.array([half_neigh for _ in range(len(y.shape))])
+    y_upper = np.array(y.shape) - y_lower
+    y_slices = []
+    for i in range(len(y_lower)):
+        y_slices.append(slice(y_lower[i], y_upper[i], 1))
     neigh_size_including_center = half_neigh * 2 + 1
-    big_y = expand(small_img=y, neighborhood_size=neigh_size_including_center)
-    big_y = big_y[half_neigh * neigh_size_including_center:(first_shape - half_neigh) * neigh_size_including_center,
-            half_neigh * neigh_size_including_center:(second_shape - half_neigh) * neigh_size_including_center]
+    big_y = expand(small_img=y, half_neigh_size=half_neigh)
     big_jay = len(mu)
     theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neigh_size_including_center, delta=delta,
                                         max_iter=max_iter,
@@ -134,8 +128,7 @@ def run_third_algorithm_expectation_at_the_beginning(y: np.array, mu: np.array, 
     first_local_sample_conditioned_moment = np.sum(first_local_sample_conditioned_moment * pi, axis=0)
     second_local_sample_conditioned_moment = np.sum(second_local_sample_conditioned_moment * pi, axis=0)
     local_sample_variance = second_local_sample_conditioned_moment - np.power(first_local_sample_conditioned_moment, 2)
-    y_stab = (constant_c * (np.sqrt(y[half_neigh:first_shape - half_neigh,
-                                    half_neigh: second_shape - half_neigh]) - first_local_sample_conditioned_moment) / np.sqrt(
+    y_stab = (constant_c * (np.sqrt(y[y_slices]) - first_local_sample_conditioned_moment) / np.sqrt(
         local_sample_variance)) + second_local_sample_conditioned_moment
     return y_stab
 
@@ -147,10 +140,8 @@ def run_linear_combination_of_components(y: np.array, mu: np.array, neighborhood
         y = y - delta
     first_shape = y.shape[0]
     second_shape = y.shape[1]
-    big_y = expand(small_img=y, neighborhood_size=neighborhood_size)
     half_neigh = int(neighborhood_size / 2)
-    big_y = big_y[half_neigh * neighborhood_size:(first_shape - half_neigh) * neighborhood_size,
-            half_neigh * neighborhood_size:(second_shape - half_neigh) * neighborhood_size]
+    big_y = expand(small_img=y, half_neigh_size=half_neigh)
     theta, gamma = run_second_algorithm(big_y, mu=mu, neighborhood_size=neighborhood_size, delta=delta,
                                         max_iter=max_iter, tol=tol)
     pi = theta[0, ...]
