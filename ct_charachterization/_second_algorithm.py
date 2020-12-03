@@ -1,9 +1,9 @@
-import numpy as np
+import numpy as onp
 
 from ._first_algorithm_using_log import run_first_log_algorithm
 
 
-def run_second_algorithm(y: np.array, mu: np.array, neighborhood_size: int, delta=-1030, max_iter=5, tol=0.01,
+def run_second_algorithm(y: onp.array, mu: onp.array, neighborhood_size: int, delta=-1030, max_iter=5, tol=0.01,
                          non_central=False):
     global_theta, global_gamma = run_first_log_algorithm(y=y, mu=mu, neighborhood_size=0, delta=delta,
                                                          max_iter=10,
