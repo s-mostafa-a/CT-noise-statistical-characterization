@@ -1,4 +1,5 @@
 import numpy as onp
+from jax import numpy as jnp
 
 from .utility.utils import central_gamma_pdf, broadcast_tile, block_matrix, sum_over_each_neighborhood_on_blocked_matrix
 from scipy.optimize import fsolve
@@ -53,8 +54,9 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
         right_hand_side = (first_numerator_summation - second_numerator_summation) / denominator_summation - 1
         # TODO: ravel and reshape work fine?
         alpha_initial_guess = previous_alpha[j, ...]
-        vectorized_get_alphas_solution = onp.vectorize(_get_alphas_solution)
-        new_alpha[j, ...] = vectorized_get_alphas_solution(right_hand_side, alpha_initial_guess)
+        vectorized_get_alphas_solution = jnp.vectorize(_get_alphas_solution)
+        new_alpha[j, ...] = onp.array(
+            vectorized_get_alphas_solution(jnp.array(right_hand_side), jnp.array(alpha_initial_guess)))
         # constraint: alpha[j] * beta[j] = mu[j]
         new_beta[j, ...] = centered_mu[j] / new_alpha[j, ...]
         # Eq. 22
