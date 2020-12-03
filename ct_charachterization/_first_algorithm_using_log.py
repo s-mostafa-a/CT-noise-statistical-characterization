@@ -1,11 +1,11 @@
 import numpy as onp
+from jax import numpy as jnp
 
 from .utility.utils import central_gamma_log_pdf, broadcast_tile, block_matrix, \
-    sum_over_each_neighborhood_on_blocked_matrix, contract
+    sum_over_each_neighborhood_on_blocked_matrix
 from scipy.optimize import fsolve
 from scipy.special import digamma, logsumexp
 from functools import reduce
-from matplotlib import pyplot as plt
 
 
 def _get_alphas_solution(right_hand_side, previous_alpha):
