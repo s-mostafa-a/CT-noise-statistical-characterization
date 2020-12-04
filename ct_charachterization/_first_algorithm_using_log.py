@@ -1,5 +1,4 @@
 import numpy as onp
-from jax import numpy as jnp
 
 from .utility.utils import central_gamma_log_pdf, broadcast_tile, block_matrix, \
     sum_over_each_neighborhood_on_blocked_matrix
