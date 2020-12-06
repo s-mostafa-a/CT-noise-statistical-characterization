@@ -8,6 +8,7 @@ from functools import reduce
 
 
 def _get_alphas_solution(right_hand_side, previous_alpha):
+    assert right_hand_side.shape == ()
     alpha_optimizer = lambda alpha_var: right_hand_side - (onp.log(alpha_var) - digamma(alpha_var))
     alpha_solution = fsolve(alpha_optimizer, previous_alpha)
     return alpha_solution
@@ -50,8 +51,7 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
             blocked_gamma_j * (blocked_log_y - onp.log(centered_mu[j])))
         denominator_summation = sum_over_each_neighborhood_on_blocked_matrix(blocked_gamma_j)
         # Eq. 24
-        right_hand_side = onp.nan_to_num(
-            (first_numerator_summation - second_numerator_summation) / denominator_summation) - 1
+        right_hand_side = ((first_numerator_summation - second_numerator_summation) / denominator_summation) - 1
         # TODO: ravel and reshape work fine?
         alpha_initial_guess = previous_alpha[j, ...]
         vectorized_get_alphas_solution = onp.vectorize(_get_alphas_solution)
@@ -64,8 +64,8 @@ def _compute_next_theta(y, centered_mu, gamma, previous_alpha, y_shape_after_blo
     return new_theta
 
 
-def run_first_log_algorithm(y: onp.array, mu: onp.array, neighborhood_size=0, delta=-1030, max_iter=5, tol=0.01,
-                            non_central=False, initial_alpha=None):
+def run_first_algorithm(y: onp.array, mu: onp.array, neighborhood_size=0, delta=-1030, max_iter=5, tol=0.01,
+                        non_central=False, initial_alpha=None):
     y_shape_after_blocking = []
     if neighborhood_size > 0:
         for ax in y.shape:
@@ -103,10 +103,18 @@ def run_first_log_algorithm(y: onp.array, mu: onp.array, neighborhood_size=0, de
         new_theta = _compute_next_theta(y=y, centered_mu=mu, gamma=gamma, previous_alpha=previous_alpha,
                                         y_shape_after_blocking=y_shape_after_blocking)
         new_gamma = _compute_next_gamma(y=y, theta=theta, big_jay=big_jay)
-        print('gamma:', onp.min(new_gamma), onp.mean(new_gamma), onp.max(new_gamma))
-        print('pi:', onp.min(new_theta[0, ...]), onp.mean(new_theta[0, ...]), onp.max(new_theta[0, ...]))
+        print('GAMMA:')
+        print('\tmin:', onp.min(new_gamma))
+        print('\tmean:', onp.mean(new_gamma))
+        print('\tmax:', onp.max(new_gamma))
+        print('PI:')
+        print('\tmin:', onp.min(new_theta[0, ...]))
+        print('\tmean:', onp.mean(new_theta[0, ...]))
+        print('\tmax:', onp.max(new_theta[0, ...]))
         err = onp.linalg.norm(new_theta - theta) / onp.linalg.norm(theta)
         theta = new_theta
         gamma = new_gamma
+        print('_______________________________')
         print(f'iteration: {n}, error: {err}')
+        print('_______________________________')
     return theta, gamma
