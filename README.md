@@ -14,4 +14,4 @@ The stabilized image:
 
 ![stabilized img](resources/figs/stabilized_img.png) 
 
-# WORK IN PROGRESS ...
+# Not Working On It Anymore
